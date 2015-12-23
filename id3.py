@@ -49,13 +49,24 @@ target_attribute_values is a dictionary ex.{'No':3, 'Yes':5}. We find the entrop
 class Tree:
     
     def __init__(self):
-        self.root = self.Node() #create a root node for the tree'''
+        self.root = self.Node() #create a root node for the tree
         
         
-    def add_node(self,parent_node,sibling_node):
+    '''we need to set fields in 3 different nodes. The one to be added, its parent and its left sibling, 
+       label and attribute are defined later. 
+    '''
+    def add_node(self,parent_node,left_sibling_node):
+        new_node = self.Node()
+        new_node.top = parent_node
         
-             
-        return node
+        
+        if parent_node.left_child==None:
+            parent_node.left_child = new_node  
+        
+        if left_sibling_node != None:
+            left_sibling_node.right_sibling=new_node
+            
+        return new_node,parent_node,left_sibling_node
         
     
     class Node():
@@ -67,24 +78,43 @@ class Tree:
             self.label = label
 
 
-def id3(data):
+def id3(data,tree,current_node):
     
-    tree = Tree()
+    
     #########################
-    target_attribute_values = count_attribute_values(my_data, len(my_data[0])-1)
+    target_attribute_values = count_attribute_values(data, len(my_data[0])-1)
     if len(target_attribute_values.keys())==1:
-        tree.root.label = target_attribute_values.keys()[0]
+        current_node.label = list(target_attribute_values)[0]
         return tree 
-    if len(data)==1:
-        tree.root.label = max(target_attribute_values,key = target_attribute_values.get)
+    if len(data[0])==1:   #TODO: expand some more
+        current_node.label = max(target_attribute_values,key = target_attribute_values.get)
         return tree
     #########################
     
-    tree.root.attribute = get_information_gain(data)
+    current_node.attribute = get_information_gain(data) # attribute here is the number of the column, NOT a string 
     best_attribute_values = count_attribute_values(data, tree.root.attribute)
-    for attr in best_attribute_values.keys():
-        
-    
+    previous_node = None
+    for attr_value in best_attribute_values.keys():
+        new_node,current_node,previous_node = tree.add_node(current_node,previous_node) #current_node as parent,previous_node as left_sibling_node 
+        previous_node =new_node
+        #Let Examples be the subset of Examples that have value v for A
+        divided_data = divide_data(data,current_node.attribute,attr_value)
+        if(len(divided_data)==0):
+           pass #new_node.label= 
+        else:
+            id3(divided_data,tree,new_node)
+            
+    return current_node
+'''
+uses the value of a column as filter to divide the data
+'''
+
+def divide_data(data,filter_column,filter_value):
+    filtered_data = [line for line in data if line[filter_column] == filter_value]
+    return filtered_data
+
+
+  
 
 '''
 we assume that we always calculate the entropy of the last attribute 
@@ -127,8 +157,6 @@ def count_attribute_values(my_data,column,filter_column=None,attribute_value=Non
 
 
 
-def devideSet():
-    pass
 
 '''
 return an array of information gain for all attributes, out of which we can take everything we want, here the max
@@ -158,17 +186,18 @@ def get_information_gain(my_data):
     
     return max(information_gain, key =information_gain.get)
     
-    
-
-
-id3 = Tree()
+   
+   
 
 
 
+tree = Tree()
+#tree.root is the first node to examine
+id3(my_data2,tree, tree.root)
 #calculate the entropy of the whole data
 #entropy(my_data2)
 
-lalal = get_information_gain(my_data2)
+#lalal = get_information_gain(my_data2)
 
-tralala = count_attribute_values(my_data,4)
+#tralala = count_attribute_values(my_data,4)
 print("oe")
