@@ -1,4 +1,3 @@
-
 import math
 
 #referrer, country, read FAQ, Pages Viewed, Service chosen
@@ -53,12 +52,13 @@ class Tree:
         
         
     '''we need to set fields in 3 different nodes. The one to be added, its parent and its left sibling, 
-       label and attribute are defined later. 
+       label and attribute are defined later.
+       attr_value is the value of the branch LEADING to the node to be created 
     '''
-    def add_node(self,parent_node,left_sibling_node):
+    def add_node(self,parent_node,left_sibling_node,attr_value):
         new_node = self.Node()
         new_node.top = parent_node
-        
+        new_node.branch=attr_value
         
         if parent_node.left_child==None:
             parent_node.left_child = new_node  
@@ -70,12 +70,13 @@ class Tree:
         
     
     class Node():
-        def __init__(self,attribute=None,top=None,left_child=None,right_sibling=None,label=None):
+        def __init__(self,attribute = None,top = None,left_child = None,right_sibling = None,label = None,branch = None):
             self.attribute = attribute
             self.top = top
             self.left_child = left_child
             self.right_sibling = right_sibling 
             self.label = label
+            self.branch = branch
 
 
 def id3(data,tree,current_node):
@@ -92,10 +93,10 @@ def id3(data,tree,current_node):
     #########################
     
     current_node.attribute = get_information_gain(data) # attribute here is the number of the column, NOT a string 
-    best_attribute_values = count_attribute_values(data, tree.root.attribute)
+    best_attribute_values = count_attribute_values(data, current_node.attribute)
     previous_node = None
     for attr_value in best_attribute_values.keys():
-        new_node,current_node,previous_node = tree.add_node(current_node,previous_node) #current_node as parent,previous_node as left_sibling_node 
+        new_node,current_node,previous_node = tree.add_node(current_node,previous_node,attr_value) #current_node as parent,previous_node as left_sibling_node 
         previous_node =new_node
         #Let Examples be the subset of Examples that have value v for A
         divided_data = divide_data(data,current_node.attribute,attr_value)
@@ -114,7 +115,29 @@ def divide_data(data,filter_column,filter_value):
     return filtered_data
 
 
-  
+'''
+prints the tree
+'''
+
+def print_tree(tree,current_node,counter = 0):
+    if current_node.left_child == None:
+        print(" : ",current_node.label)
+        return
+    else:
+        print(" " * counter, current_node.attribute, " = " , end="")     #TODO: change the if below, its redundant
+        print(current_node.left_child.branch, end ="" if current_node.left_child.attribute == None else "\n")
+        
+        if current_node.left_child.attribute != None:
+            print_tree(tree,current_node.left_child,counter=counter + 1)
+        else:
+            print(current_node.left_child.label)
+            if current_node.left_child.right_sibling!=None:
+                print_tree(tree,current_node.left_child.right_sibling,counter=counter+1)
+            return
+        
+        
+    
+
 
 '''
 we assume that we always calculate the entropy of the last attribute 
@@ -179,7 +202,6 @@ def get_information_gain(my_data):
         for attribute in attribute_values.keys():
             value_given_other_attribute= count_attribute_values(my_data,len(my_data[0])-1,i,attribute) #here we count the target attribute GIVEN another attribute
             tempEntropy +=attribute_values[attribute]/(sum(attribute_values.values()))*entropy(value_given_other_attribute)
-            print("tralala")
             
         information_gain[i] = (total_entropy - tempEntropy)
         
@@ -193,11 +215,12 @@ def get_information_gain(my_data):
 
 tree = Tree()
 #tree.root is the first node to examine
-id3(my_data2,tree, tree.root)
+lala = id3(my_data2,tree, tree.root)
 #calculate the entropy of the whole data
 #entropy(my_data2)
 
 #lalal = get_information_gain(my_data2)
 
 #tralala = count_attribute_values(my_data,4)
+print_tree(tree,tree.root)
 print("oe")
