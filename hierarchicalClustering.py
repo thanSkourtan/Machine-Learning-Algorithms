@@ -51,6 +51,17 @@ def standard_deviation(data_list):
     for value in data_list:
         sum_of_squares += round(pow(value - mean_of_list,2),3)
     return math.sqrt(sum_of_squares/(len(data_list)-1))
+
+
+'''
+standardizes the values of the list passed as argument
+'''
+
+def standardisation(data_list):
+    m = mean(data_list)
+    sd = standard_deviation(data_list)
+    return [((row-m)/sd) for row in data_list]
+
     
 '''
 returns an attribute(variable) list out of a two dimensional data list
@@ -105,19 +116,16 @@ point2 = Point(99,1.9,2.9)
 print(euclidean_distance(point1,point2))
 
 '''
-
-
-
 myList = pick_up_column(data,5)
-print(mean(myList))
-print(standard_deviation(myList))
+lalala = standardisation(myList)
 
-myList = pick_up_column(data,6)
-print(mean(myList))
-print(standard_deviation(myList))
+print("oe")
 
-myList = pick_up_column(data,7)
-print(mean(myList))
-print(standard_deviation(myList))
+
+
+
+
+
+
 
 
