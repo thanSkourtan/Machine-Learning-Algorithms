@@ -4,6 +4,7 @@
 '''
 
 import math
+from sys import float_info
 
 class Point:
     '''
@@ -20,18 +21,60 @@ class Point:
             self.list_of_coordinates.append(self.dimension)
         
 
+
+
+class Cluster():
+    '''
+    distance is the value of the vertical axis. at the beginning this value is 0 for all clusters.
+    x1 and *args refer to the attributes to be used to clusterize the sample data. Left and right 
+    are the children nodes of the dendrogram. Does it need parent node???? for *attributes please
+    see https://www.python.org/dev/peps/pep-3102/
+    '''
+    def __init__(self,*attributes,left=None,right=None,distance=0.0,idn=-1):
+        self.list_of_coordinates= []
+        for attribute in attributes:
+            self.list_of_coordinates.append(attribute)
+        
+        self.left = left
+        self.right = right
+        self.distance = distance
+        self.idn = idn
+    
+
 '''
 counts the euclidean distance of two points in the n-dimensional space in which they are definedxs
 '''
     
-def euclidean_distance(point1, point2):
-    if len(point1.list_of_coordinates) != len(point2.list_of_coordinates):
+def euclidean_distance(cluster1, cluster2):
+    if len(cluster1.list_of_coordinates) != len(cluster2.list_of_coordinates):
         print("The two points must be defined in the same dimensional space")
         return
     sum_of_squares = 0.0
-    for i in range(0,len(point1.list_of_coordinates)):
-        sum_of_squares += pow(point1.list_of_coordinates[i]-point2.list_of_coordinates[i],2)
+    for i in range(0,len(cluster1.list_of_coordinates)):
+        sum_of_squares += pow(cluster1.list_of_coordinates[i]-cluster2.list_of_coordinates[i],2)
     return math.sqrt(sum_of_squares)
+
+
+def agglomerative_clustering(data,distance = euclidean_distance):
+    distances = {}
+    
+    cluster_list = [Cluster(row[5],row[6],row[7]) for row in data] # row[5], row[6], row[7] are the 3 attributes, if i want to pass other parameters i use keyword arguments instead of positional
+    
+    
+    shortest = float_info.max
+    shortest_cluster = ()
+    for i in range(0,len(cluster_list)-1):
+        for j in range(i+1,len(cluster_list)):
+            distances[i,j]=distance(cluster_list[i],cluster_list[j])
+            if distances[i,j] < shortest:
+                shortest = distances[i,j]
+                shortest_cluster = (i,j)
+    
+    
+    
+    
+
+
 
 
 '''
@@ -73,9 +116,20 @@ def pick_up_column(data,column_no):
         attribute_list.append(row[column_no])
     return attribute_list
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 '''sample data'''
-
-
 data = [[0,2,9,14,2,72,4.8,3.5,"S"],
         [26,4,13,11,0,75,2.8,2.5,"C"],
         [0,10,9,8,0,59,5.4,2.7,"C"],
@@ -109,18 +163,7 @@ data = [[0,2,9,14,2,72,4.8,3.5,"S"],
 
 
 
-'''
-point1 = Point(51,6.0,3.0)
-point2 = Point(99,1.9,2.9)
-
-print(euclidean_distance(point1,point2))
-
-'''
-myList = pick_up_column(data,5)
-lalala = standardisation(myList)
-
-print("oe")
-
+agglomerative_clustering(data)
 
 
 
