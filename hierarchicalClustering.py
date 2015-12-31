@@ -82,25 +82,32 @@ def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
     
     last_idn = cluster_list[-1].idn  #gets the last id number
     
-    while(len(cluster_list)!=0):
-        shortest = float_info.max
-        shortest_cluster = ()
-        
-        for i in range(0,len(cluster_list)-1):
+    #build the distances array
+    for i in range(0,len(cluster_list)-1):
             for j in range(i+1,len(cluster_list)):
                 distances[cluster_list[i].idn,cluster_list[j].idn]=distance(cluster_list[i],cluster_list[j])
-                if distances[cluster_list[i].idn,cluster_list[j].idn] < shortest:
+    
+    
+    
+    while(len(cluster_list)!=1):
+        shortest = float_info.max
+        shortest_cluster = ()
+        #find the shortest distance
+        for i in range(0,len(cluster_list)-1):
+            for j in range(i+1,len(cluster_list)):
+                if distances[cluster_list[i].idn,cluster_list[j].idn] < shortest: #shortest is used only here
                     shortest = distances[cluster_list[i].idn,cluster_list[j].idn] 
                     shortest_cluster = (cluster_list[i],cluster_list[j])
+                    position_in_cluster_list = (i,j)
                     
         #create a new cluster
-        temporary_cluster = Cluster(left = cluster_list[shortest_cluster[0].idn], right = cluster_list[shortest_cluster[1].idn],distance = shortest,idn= last_idn+1)            
+        temporary_cluster = Cluster(left = shortest_cluster[0], right = shortest_cluster[1],distance = shortest,idn= last_idn+1)            
         last_idn +=1
         
         #the clusters created remain alive, it is the cluster_list that is being restructured each time            
         #delete TODO: find a less expensive way to insert and delete items from the list and distance array
-        del cluster_list[shortest_cluster[1].idn] #we first delete the item with the largest index so that the smallest index does not change
-        del cluster_list[shortest_cluster[0].idn]
+        del cluster_list[position_in_cluster_list[1]] #we first delete the item with the largest index so that the smallest index does not change
+        del cluster_list[position_in_cluster_list[0]]
         
         
         
@@ -114,6 +121,7 @@ def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
         '''
         TODO: the below if statements to be removed
         '''
+        
         for cluster in cluster_list:
             low_first = min(cluster.idn,shortest_cluster[0].idn)
             high_first = max(cluster.idn,shortest_cluster[0].idn)
@@ -145,15 +153,16 @@ def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
                 
             ''' 
                 
+        del distances[shortest_cluster[0].idn,shortest_cluster[1].idn]
+        
         #insert the new cluster to the list
         cluster_list.append(temporary_cluster)
         
+        #merge the two dictionaries
+        distances.update(temp_dictionary)
         
         
-        
-        for key,value in distances.items():
-            if key == shortest_cluster[0] or key == shortest_cluster[1] or value == shortest_cluster[0] or value == shortest_cluster[1]:
-                distances.pop[key]
+     
         
         
         print("oe")
