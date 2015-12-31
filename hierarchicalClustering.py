@@ -31,9 +31,9 @@ class Cluster():
     see https://www.python.org/dev/peps/pep-3102/
     '''
     def __init__(self,*attributes,left=None,right=None,distance=0.0,idn=-1):
-        self.list_of_coordinates= []
+        self.list_of_attributes= []
         for attribute in attributes:
-            self.list_of_coordinates.append(attribute)
+            self.list_of_attributes.append(attribute)
         
         self.left = left
         self.right = right
@@ -42,37 +42,123 @@ class Cluster():
     
 
 '''
+non- euclidean distance calculator, used for categorical data. All data concern presence - absence
+so their values is either 0 or 1.
+'''
+
+def jaccard_index(cluster1,cluster2):
+    if len(cluster1.list_of_attributes) != len(cluster2.list_of_attributes):
+        print("The two points must be defined in the same dimensional space")
+        return
+    nominator = 0.0
+    denominator = 0.0
+    
+    for i in range(0,len(cluster1.list_of_attributes)):
+        if cluster1.list_of_attributes[i]==1 and cluster2.list_of_attributes[i]==1:
+            nominator += 1
+            denominator += 1
+        elif cluster1.list_of_attributes[i] != cluster2.list_of_attributes[i]:
+            denominator += 1
+    return 1 - nominator/denominator
+
+'''
 counts the euclidean distance of two points in the n-dimensional space in which they are definedxs
 '''
     
 def euclidean_distance(cluster1, cluster2):
-    if len(cluster1.list_of_coordinates) != len(cluster2.list_of_coordinates):
+    if len(cluster1.list_of_attributes) != len(cluster2.list_of_attributes):
         print("The two points must be defined in the same dimensional space")
         return
     sum_of_squares = 0.0
-    for i in range(0,len(cluster1.list_of_coordinates)):
-        sum_of_squares += pow(cluster1.list_of_coordinates[i]-cluster2.list_of_coordinates[i],2)
+    for i in range(0,len(cluster1.list_of_attributes)):
+        sum_of_squares += pow(cluster1.list_of_attributes[i]-cluster2.list_of_attributes[i],2)
     return math.sqrt(sum_of_squares)
 
 
-def agglomerative_clustering(data,distance = euclidean_distance):
+def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
     distances = {}
     
-    cluster_list = [Cluster(row[5],row[6],row[7]) for row in data] # row[5], row[6], row[7] are the 3 attributes, if i want to pass other parameters i use keyword arguments instead of positional
+    cluster_list = [Cluster(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9], idn = i) for i,row in enumerate(data)] # row[5], row[6], row[7] are the 3 attributes, if i want to pass other parameters i use keyword arguments instead of positional
     
+    last_idn = cluster_list[-1].idn  #gets the last id number
     
-    shortest = float_info.max
-    shortest_cluster = ()
-    for i in range(0,len(cluster_list)-1):
-        for j in range(i+1,len(cluster_list)):
-            distances[i,j]=distance(cluster_list[i],cluster_list[j])
-            if distances[i,j] < shortest:
-                shortest = distances[i,j]
-                shortest_cluster = (i,j)
-    
-    
-    
-    
+    while(len(cluster_list)!=0):
+        shortest = float_info.max
+        shortest_cluster = ()
+        
+        for i in range(0,len(cluster_list)-1):
+            for j in range(i+1,len(cluster_list)):
+                distances[cluster_list[i].idn,cluster_list[j].idn]=distance(cluster_list[i],cluster_list[j])
+                if distances[cluster_list[i].idn,cluster_list[j].idn] < shortest:
+                    shortest = distances[cluster_list[i].idn,cluster_list[j].idn] 
+                    shortest_cluster = (cluster_list[i],cluster_list[j])
+                    
+        #create a new cluster
+        temporary_cluster = Cluster(left = cluster_list[shortest_cluster[0].idn], right = cluster_list[shortest_cluster[1].idn],distance = shortest,idn= last_idn+1)            
+        last_idn +=1
+        
+        #the clusters created remain alive, it is the cluster_list that is being restructured each time            
+        #delete TODO: find a less expensive way to insert and delete items from the list and distance array
+        del cluster_list[shortest_cluster[1].idn] #we first delete the item with the largest index so that the smallest index does not change
+        del cluster_list[shortest_cluster[0].idn]
+        
+        
+        
+        
+        #we now restructure the distances dictionary
+        
+        #temp_dictionary = {(temporary_cluster.idn, cluster.idn):max(distances[shortest_cluster[0],cluster.idn], distances[shortest_cluster[1],cluster.idn]) for cluster in cluster_list if cluster.idn != temporary_cluster.idn }
+        
+        temp_dictionary = {}
+        
+        '''
+        TODO: the below if statements to be removed
+        '''
+        for cluster in cluster_list:
+            low_first = min(cluster.idn,shortest_cluster[0].idn)
+            high_first = max(cluster.idn,shortest_cluster[0].idn)
+            
+            low_second  = min(cluster.idn,shortest_cluster[1].idn)
+            high_second = max(cluster.idn,shortest_cluster[1].idn)
+            
+            temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[low_first,high_first], distances[low_second,high_second])
+            del distances[low_first,high_first]
+            del distances[low_second,high_second]
+            
+            '''
+            if cluster.idn<shortest_cluster[0].idn and cluster.idn<shortest_cluster[1].idn:
+                temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[cluster.idn,shortest_cluster[0].idn], distances[cluster.idn,shortest_cluster[1].idn])
+                del distances[cluster.idn,shortest_cluster[0].idn]
+                del distances[cluster.idn,shortest_cluster[1].idn]
+            elif cluster.idn<shortest_cluster[0].idn and cluster.idn>shortest_cluster[1].idn:
+                temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[cluster.idn, shortest_cluster[0].idn], distances[shortest_cluster[1].idn,cluster.idn])
+                del distances[cluster.idn, shortest_cluster[0].idn]
+                del distances[shortest_cluster[1].idn,cluster.idn]
+            elif cluster.idn>shortest_cluster[0].idn and cluster.idn<shortest_cluster[1].idn:
+                temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[shortest_cluster[0].idn,cluster.idn], distances[cluster.idn,shortest_cluster[1].idn])
+                del distances[shortest_cluster[0].idn,cluster.idn]
+                del distances[cluster.idn,shortest_cluster[1].idn]
+            else:
+                temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[shortest_cluster[0].idn, cluster.idn], distances[shortest_cluster[1].idn,cluster.idn])
+                del distances[shortest_cluster[0].idn, cluster.idn]
+                del distances[shortest_cluster[1].idn,cluster.idn]
+                
+            ''' 
+                
+        #insert the new cluster to the list
+        cluster_list.append(temporary_cluster)
+        
+        
+        
+        
+        for key,value in distances.items():
+            if key == shortest_cluster[0] or key == shortest_cluster[1] or value == shortest_cluster[0] or value == shortest_cluster[1]:
+                distances.pop[key]
+        
+        
+        print("oe")
+
+
 
 
 
@@ -116,17 +202,16 @@ def pick_up_column(data,column_no):
         attribute_list.append(row[column_no])
     return attribute_list
 
+    
 
 
-
-
-
-
-
-
-
-
-
+data2 = [[1,1,1,0,1,0,0,1,1,1],
+         [1,1,0,1,1,0,0,0,0,1],
+         [0,1,1,0,1,0,0,1,0,0],
+         [0,0,0,1,0,1,0,0,0,0],
+         [1,1,1,0,1,0,1,1,1,0],
+         [0,1,0,1,1,0,0,0,0,1],
+         [0,1,1,0,1,1,0,1,1,0]]
 
 
 '''sample data'''
@@ -163,7 +248,7 @@ data = [[0,2,9,14,2,72,4.8,3.5,"S"],
 
 
 
-agglomerative_clustering(data)
+agglomerative_clustering(data2,jaccard_index)
 
 
 
