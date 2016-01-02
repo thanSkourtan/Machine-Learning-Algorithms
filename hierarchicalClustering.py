@@ -6,7 +6,7 @@
 import math
 from sys import float_info
 from copy import copy
-
+from PIL import Image,ImageDraw
 
 class Point:
     '''
@@ -32,7 +32,7 @@ class Cluster():
     are the children nodes of the dendrogram. Does it need parent node???? for *attributes please
     see https://www.python.org/dev/peps/pep-3102/
     '''
-    def __init__(self,*attributes,left=None,right=None,distance=0.0,idn):
+    def __init__(self,*attributes,left=None,right=None,distance=0.0,idn=None,label=None,left_top_corner_x_coordinate=None):
         self.list_of_attributes= []
         for attribute in attributes:
             self.list_of_attributes.append(attribute)
@@ -41,7 +41,8 @@ class Cluster():
         self.right = right
         self.distance = distance
         self.idn = idn
-    
+        self.label = label
+        self.left_top_corner_x_coordinate = left_top_corner_x_coordinate
 
 '''
 non- euclidean distance calculator, used for categorical data. All data concern presence - absence
@@ -80,7 +81,9 @@ def euclidean_distance(cluster1, cluster2):
 def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
     distances = {}
     
-    cluster_list = [Cluster(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9], idn = i) for i,row in enumerate(data)] # row[5], row[6], row[7] are the 3 attributes, if i want to pass other parameters i use keyword arguments instead of positional
+    cluster_list = [Cluster(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9], idn = i,label = row[10]) for i,row in enumerate(data)] # row[5], row[6], row[7] are the 3 attributes, if i want to pass other parameters i use keyword arguments instead of positional
+    
+    instances_num = len(cluster_list)
     
     last_idn = cluster_list[-1].idn  #gets the last id number
     
@@ -88,8 +91,6 @@ def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
     for i in range(0,len(cluster_list)-1):
             for j in range(i+1,len(cluster_list)):
                 distances[cluster_list[i].idn,cluster_list[j].idn]=distance(cluster_list[i],cluster_list[j])
-    
-    
     
     while(len(cluster_list)!=1):
         shortest = float_info.max
@@ -104,34 +105,27 @@ def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
                         if distances[cluster_list[i].idn,cluster_list[j].idn] < shortest: #shortest is used only here
                             shortest = distances[cluster_list[i].idn,cluster_list[j].idn] 
                             shortest_cluster = (copy(cluster_list[i]),copy(cluster_list[j]))
+                            shortest_cluster_temp = cluster_list[i],cluster_list[j]
                             position_in_cluster_list = (i,j)
                             changed = True
         
         if not changed: 
             break
-        
+        '''
+        TODO: TO REMOVE SHORTEST_CLUSTER_TEMP AND SEE WHAT THING COPY IN SHORTEST_CLUSTER AFFECTS
+        '''
         #create a new cluster
-        temporary_cluster = Cluster(left = shortest_cluster[0], right = shortest_cluster[1],distance = shortest,idn= last_idn+1)            
+        temporary_cluster = Cluster(left = shortest_cluster_temp[0], right = shortest_cluster_temp[1],distance = shortest,idn= last_idn+1)            
         last_idn +=1
                 
-        #delete TODO: find a less expensive way to insert and delete items from the list and distance array
-        '''
-        del cluster_list[position_in_cluster_list[1]] #we first delete the item with the largest index so that the smallest index does not change
-        del cluster_list[position_in_cluster_list[0]]
-        '''
+                
         cluster_list[position_in_cluster_list[0]].idn=-1
         cluster_list[position_in_cluster_list[1]].idn=-1
         
         
         #we now restructure the distances dictionary
         
-        #temp_dictionary = {(temporary_cluster.idn, cluster.idn):max(distances[shortest_cluster[0],cluster.idn], distances[shortest_cluster[1],cluster.idn]) for cluster in cluster_list if cluster.idn != temporary_cluster.idn }
-        
         temp_dictionary = {}
-        
-        '''
-        TODO: the below if statements to be removed
-        '''
         
         for cluster in cluster_list:
             if cluster.idn!=-1:
@@ -144,28 +138,6 @@ def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
                 temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[low_first,high_first], distances[low_second,high_second])
                 del distances[low_first,high_first]
                 del distances[low_second,high_second]
-            
-            '''
-            if cluster.idn<shortest_cluster[0].idn and cluster.idn<shortest_cluster[1].idn:
-                temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[cluster.idn,shortest_cluster[0].idn], distances[cluster.idn,shortest_cluster[1].idn])
-                del distances[cluster.idn,shortest_cluster[0].idn]
-                del distances[cluster.idn,shortest_cluster[1].idn]
-            elif cluster.idn<shortest_cluster[0].idn and cluster.idn>shortest_cluster[1].idn:
-                temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[cluster.idn, shortest_cluster[0].idn], distances[shortest_cluster[1].idn,cluster.idn])
-                del distances[cluster.idn, shortest_cluster[0].idn]
-                del distances[shortest_cluster[1].idn,cluster.idn]
-            elif cluster.idn>shortest_cluster[0].idn and cluster.idn<shortest_cluster[1].idn:
-                temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[shortest_cluster[0].idn,cluster.idn], distances[cluster.idn,shortest_cluster[1].idn])
-                del distances[shortest_cluster[0].idn,cluster.idn]
-                del distances[cluster.idn,shortest_cluster[1].idn]
-            else:
-                temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[shortest_cluster[0].idn, cluster.idn], distances[shortest_cluster[1].idn,cluster.idn])
-                del distances[shortest_cluster[0].idn, cluster.idn]
-                del distances[shortest_cluster[1].idn,cluster.idn]
-                
-            ''' 
-                
-        
         
         del distances[shortest_cluster[0].idn,shortest_cluster[1].idn]
         
@@ -175,16 +147,8 @@ def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
         #merge the two dictionaries
         distances.update(temp_dictionary)
         
-        
-     
-        
-        
         print("oe")
-
-
-
-
-
+    return cluster_list,instances_num
 
 '''
 finds the mean of a list 
@@ -228,13 +192,13 @@ def pick_up_column(data,column_no):
     
 
 
-data2 = [[1,1,1,0,1,0,0,1,1,1],
-         [1,1,0,1,1,0,0,0,0,1],
-         [0,1,1,0,1,0,0,1,0,0],
-         [0,0,0,1,0,1,0,0,0,0],
-         [1,1,1,0,1,0,1,1,1,0],
-         [0,1,0,1,1,0,0,0,0,1],
-         [0,1,1,0,1,1,0,1,1,0]]
+data2 = [[1,1,1,0,1,0,0,1,1,1,"A"],
+         [1,1,0,1,1,0,0,0,0,1,"B"],
+         [0,1,1,0,1,0,0,1,0,0,"C"],
+         [0,0,0,1,0,1,0,0,0,0,"D"],
+         [1,1,1,0,1,0,1,1,1,0,"E"],
+         [0,1,0,1,1,0,0,0,0,1,"F"],
+         [0,1,1,0,1,1,0,1,1,0,"G"]]
 
 
 '''sample data'''
@@ -271,12 +235,74 @@ data = [[0,2,9,14,2,72,4.8,3.5,"S"],
 
 
 
-agglomerative_clustering(data2,jaccard_index)
+def print_dendrogram(cluster_list,instances_num):
+    
+    horizontal_margins = 100
+    cluster_width = 40
+    width = cluster_width * (instances_num+1)
+    
+    height = 600
+    vertical_margins = 100
+    
+    cluster_height = lambda cluster_distance :  ((height - vertical_margins) * cluster_distance)/cluster_list[-1].distance
+    
+    
+    
+    # Create a new image with a white background
+    image=Image.new('RGB',(width + horizontal_margins,height),(255,255,255))
+    draw=ImageDraw.Draw(image)
+    
+    #x-axis
+    draw.line((horizontal_margins/2,height-vertical_margins/2,width+horizontal_margins/2,height-vertical_margins/2),fill=(255,0,0))
+    
+    counter = 1
+    for i in range(instances_num,len(cluster_list)):
+        # if the left or right foot of the cluster is onto the x-axis, print the label of the data instance 
+        if cluster_list[i].left.left is None:
+            draw.text((horizontal_margins/2 + cluster_width * counter,height - vertical_margins/2+6),cluster_list[i].left.label,fill=(255,0,0)) #fill = xroma
+            cluster_list[i].left.left_top_corner_x_coordinate=horizontal_margins/2 + cluster_width * counter
+            counter +=1
+        if cluster_list[i].right.right is None:
+            draw.text((horizontal_margins/2 + cluster_width * counter,height - vertical_margins/2+6),cluster_list[i].right.label,fill=(255,0,0)) #fill = xroma
+            cluster_list[i].right.left_top_corner_x_coordinate=horizontal_margins/2 + cluster_width * counter
+            counter+=1
+            
+        #vertical line                                            
+        draw.line((cluster_list[i].left.left_top_corner_x_coordinate + (0.0 if cluster_list[i].left.left is None else cluster_width/2),
+                    -cluster_height(cluster_list[i].left.distance) - vertical_margins/2 + height,
+                    cluster_list[i].left.left_top_corner_x_coordinate + (0.0 if cluster_list[i].left.left is None else cluster_width/2),
+                    -cluster_height(cluster_list[i].distance) - vertical_margins/2+height),
+                    fill=(255,0,0))
+        
+        #horizontal line
+        draw.line((cluster_list[i].left.left_top_corner_x_coordinate + (0.0 if cluster_list[i].left.left is None else cluster_width/2),
+                  -cluster_height(cluster_list[i].distance) - vertical_margins/2+height,
+                  cluster_list[i].right.left_top_corner_x_coordinate + (0 if cluster_list[i].right.right is None else cluster_width/2),
+                  -cluster_height(cluster_list[i].distance) - vertical_margins/2 + height),
+                  fill=(255,0,0))
+        
+        #vertical line
+        draw.line((cluster_list[i].right.left_top_corner_x_coordinate + (0 if cluster_list[i].right.right is None else cluster_width/2),
+                    -cluster_height(cluster_list[i].right.distance)- vertical_margins/2 + height,
+                    cluster_list[i].right.left_top_corner_x_coordinate + (0 if cluster_list[i].right.right is None else cluster_width/2),
+                    -cluster_height(cluster_list[i].distance) - vertical_margins/2 + height),
+                    fill=(255,0,0))
+        
+        cluster_list[i].left_top_corner_x_coordinate = cluster_list[i].left.left_top_corner_x_coordinate + (0.0 if cluster_list[i].left.left is None else cluster_width/2)
+        #break
+        print("lala")
+    
+    
+    image.show()
+    
 
 
 
+cluster_list, instances_num = agglomerative_clustering(data2,jaccard_index)
 
 
+
+print_dendrogram(cluster_list,instances_num)
 
 
 
