@@ -5,6 +5,8 @@
 
 import math
 from sys import float_info
+from copy import copy
+
 
 class Point:
     '''
@@ -30,7 +32,7 @@ class Cluster():
     are the children nodes of the dendrogram. Does it need parent node???? for *attributes please
     see https://www.python.org/dev/peps/pep-3102/
     '''
-    def __init__(self,*attributes,left=None,right=None,distance=0.0,idn=-1):
+    def __init__(self,*attributes,left=None,right=None,distance=0.0,idn):
         self.list_of_attributes= []
         for attribute in attributes:
             self.list_of_attributes.append(attribute)
@@ -50,9 +52,9 @@ def jaccard_index(cluster1,cluster2):
     if len(cluster1.list_of_attributes) != len(cluster2.list_of_attributes):
         print("The two points must be defined in the same dimensional space")
         return
+    
     nominator = 0.0
     denominator = 0.0
-    
     for i in range(0,len(cluster1.list_of_attributes)):
         if cluster1.list_of_attributes[i]==1 and cluster2.list_of_attributes[i]==1:
             nominator += 1
@@ -92,24 +94,33 @@ def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
     while(len(cluster_list)!=1):
         shortest = float_info.max
         shortest_cluster = ()
+        
+        changed = False
         #find the shortest distance
         for i in range(0,len(cluster_list)-1):
-            for j in range(i+1,len(cluster_list)):
-                if distances[cluster_list[i].idn,cluster_list[j].idn] < shortest: #shortest is used only here
-                    shortest = distances[cluster_list[i].idn,cluster_list[j].idn] 
-                    shortest_cluster = (cluster_list[i],cluster_list[j])
-                    position_in_cluster_list = (i,j)
-                    
+            if cluster_list[i].idn!=-1:
+                for j in range(i+1,len(cluster_list)):
+                    if cluster_list[j].idn!=-1:
+                        if distances[cluster_list[i].idn,cluster_list[j].idn] < shortest: #shortest is used only here
+                            shortest = distances[cluster_list[i].idn,cluster_list[j].idn] 
+                            shortest_cluster = (copy(cluster_list[i]),copy(cluster_list[j]))
+                            position_in_cluster_list = (i,j)
+                            changed = True
+        
+        if not changed: 
+            break
+        
         #create a new cluster
         temporary_cluster = Cluster(left = shortest_cluster[0], right = shortest_cluster[1],distance = shortest,idn= last_idn+1)            
         last_idn +=1
-        
-        #the clusters created remain alive, it is the cluster_list that is being restructured each time            
+                
         #delete TODO: find a less expensive way to insert and delete items from the list and distance array
+        '''
         del cluster_list[position_in_cluster_list[1]] #we first delete the item with the largest index so that the smallest index does not change
         del cluster_list[position_in_cluster_list[0]]
-        
-        
+        '''
+        cluster_list[position_in_cluster_list[0]].idn=-1
+        cluster_list[position_in_cluster_list[1]].idn=-1
         
         
         #we now restructure the distances dictionary
@@ -123,15 +134,16 @@ def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
         '''
         
         for cluster in cluster_list:
-            low_first = min(cluster.idn,shortest_cluster[0].idn)
-            high_first = max(cluster.idn,shortest_cluster[0].idn)
-            
-            low_second  = min(cluster.idn,shortest_cluster[1].idn)
-            high_second = max(cluster.idn,shortest_cluster[1].idn)
-            
-            temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[low_first,high_first], distances[low_second,high_second])
-            del distances[low_first,high_first]
-            del distances[low_second,high_second]
+            if cluster.idn!=-1:
+                low_first = min(cluster.idn,shortest_cluster[0].idn)
+                high_first = max(cluster.idn,shortest_cluster[0].idn)
+                
+                low_second  = min(cluster.idn,shortest_cluster[1].idn)
+                high_second = max(cluster.idn,shortest_cluster[1].idn)
+                
+                temp_dictionary[cluster.idn,temporary_cluster.idn]=max(distances[low_first,high_first], distances[low_second,high_second])
+                del distances[low_first,high_first]
+                del distances[low_second,high_second]
             
             '''
             if cluster.idn<shortest_cluster[0].idn and cluster.idn<shortest_cluster[1].idn:
@@ -153,6 +165,8 @@ def agglomerative_clustering(data,distance = euclidean_distance,linkage=max):
                 
             ''' 
                 
+        
+        
         del distances[shortest_cluster[0].idn,shortest_cluster[1].idn]
         
         #insert the new cluster to the list
