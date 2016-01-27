@@ -9,6 +9,7 @@ def mean(data_list):
     """finds the mean of a list"""
     return sum(data_list)/float(len(data_list))
 
+
 def standard_deviation(data_list):
     """finds the standard deviation of a list"""
     mean_of_list = round(mean(data_list), 3)
@@ -17,12 +18,14 @@ def standard_deviation(data_list):
         sum_of_squares += round(pow(value - mean_of_list, 2), 3)
     return sqrt(sum_of_squares/(len(data_list)-1))
 
+
 def pick_up_column(data, column_no):
     """returns an attribute(variable) list out of a two dimensional data list"""
     attribute_list = []
     for row in data:
         attribute_list.append(row[column_no])
     return attribute_list
+
 
 def pick_up_all_data_columns(data):
     """Returns a list containing lists of all columns of a two dimensional data list"""

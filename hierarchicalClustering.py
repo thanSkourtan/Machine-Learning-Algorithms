@@ -7,7 +7,7 @@ from sys import float_info
 from copy import copy
 from PIL import Image, ImageDraw
 from csv import reader
-from utility.distance import euclidean_distance
+from utility.distanceMetrics import euclidean_distance
 
 class Cluster():
     '''
