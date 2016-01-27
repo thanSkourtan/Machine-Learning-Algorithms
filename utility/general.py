@@ -1,5 +1,4 @@
-'''
-Includes functions of general use.
+'''Includes functions of general use.
 @author: than_skourtan
 '''
 

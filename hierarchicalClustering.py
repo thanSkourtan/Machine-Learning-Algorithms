@@ -2,12 +2,13 @@
 @author: than_skourtan
 '''
 
-from math import pow,sqrt
+
 from sys import float_info
 from copy import copy
-from PIL import Image, ImageDraw
 from csv import reader
 from utility.distanceMetrics import euclidean_distance
+from utility.general import standard_deviation, mean
+from utility.diagrams import Diagram
 
 class Cluster():
     '''
@@ -178,23 +179,6 @@ def agglomerative_clustering(data, distance = euclidean_distance,linkage=max):
         print("oe")
     return cluster_list, instances_num
 
-'''
-finds the mean of a list 
-'''
-
-def mean(data_list):
-    return sum(data_list)/float(len(data_list))
-
-'''
-finds the standard deviation of a list
-'''
-
-def standard_deviation(data_list):
-    mean_of_list = round(mean(data_list), 3)
-    sum_of_squares = 0.0
-    for value in data_list:
-        sum_of_squares += round(pow(value - mean_of_list, 2), 3)
-    return sqrt(sum_of_squares/(len(data_list)-1))
 
 
 '''
@@ -209,88 +193,6 @@ def standardisation(data_list):
     
 
 
-def print_cluster(cluster, first_available, draw, highest_cluster_distance):
-    
-    horizontal_margins = 100
-    cluster_width = 40
-    height = 6000
-    vertical_margins = 100
-    cluster_height = lambda cluster_distance :  ((height - vertical_margins) * cluster_distance)/highest_cluster_distance
-    
-    #base case, first print the labels, then the first clusters
-    if cluster.left is None and cluster.right is None:
-        draw.text((horizontal_margins/2 + cluster_width * first_available, height - vertical_margins/2+6), str(cluster.label), fill=(0, 0, 0)) #fill = xroma
-        cluster.left_top_corner_x_coordinate = horizontal_margins/2 + cluster_width * first_available
-        first_available +=1
-        return cluster, first_available   
-    else: 
-        child_one, first_available = print_cluster(cluster.left, first_available, draw, highest_cluster_distance)
-        child_two, first_available = print_cluster(cluster.right, first_available, draw, highest_cluster_distance)
-        
-        x1= child_one.left_top_corner_x_coordinate + (0.0 if child_one.left is None else cluster_width/2)
-        y1= -cluster_height(cluster.left.distance) - vertical_margins/2 + height
-        x2= child_one.left_top_corner_x_coordinate + (0.0 if child_one.left is None else cluster_width/2)
-        y2= -cluster_height(cluster.distance) - vertical_margins/2+height
-        
-        x3= child_two.left_top_corner_x_coordinate + (0.0 if child_two.left is None else cluster_width/2)
-        y3= -cluster_height(cluster.right.distance)- vertical_margins/2 + height
-        x4= child_two.left_top_corner_x_coordinate + (0.0 if child_two.left is None else cluster_width/2)
-        y4= -cluster_height(cluster.distance) - vertical_margins/2 + height
-        
-        #vertical line                                            
-        draw.line((x1, y1, x2, y2),fill=(0, 0, 0), width=1)
-        
-        #horizontal line
-        draw.line((x2, y2, x4, y4),fill=(0, 0, 0), width=1)
-        
-        #vertical line                                            
-        draw.line((x3, y3, x4, y4),fill=(0, 0, 0), width=1)
-            
-        cluster.left_top_corner_x_coordinate = x2
-        
-        return cluster, first_available
-        
-    print("oe")
-  
-
-def print_dendrogram(cluster_list, instances_num):
-    horizontal_margins = 100
-    cluster_width = 40
-    width = cluster_width * (instances_num+1)
-    
-    height = 6000
-    vertical_margins = 100
-    
-    cluster_height = lambda cluster_distance :  ((height - vertical_margins) * cluster_distance)/cluster_list[-1].distance
-    
-    y_axis_split=5
-    
-    
-    # Create a new image with a white background
-    image=Image.new('RGB', (width + horizontal_margins, height), (255, 255, 255))
-    draw=ImageDraw.Draw(image)
-    
-    #x-axis
-    draw.line((horizontal_margins/2, height-vertical_margins/2, width+horizontal_margins/2, height-vertical_margins/2), fill=(255, 0, 0))
-    
-    #y-axis
-    draw.line((horizontal_margins/2, height-vertical_margins/2, horizontal_margins/2, vertical_margins/2), fill=(255, 0, 0))
-    counter = 0
-    #print some random heights
-    for i in range(y_axis_split+1):
-        draw.text((horizontal_margins/2-30, vertical_margins/2+(height-vertical_margins)/y_axis_split*counter), str(round(cluster_list[-1].distance*(1-counter*1/y_axis_split), 2)),fill=(255, 0, 0))
-        counter +=1
-    
-    #print the heights of all clusters
-    for cluster in cluster_list:
-        draw.text((horizontal_margins/2-30, -cluster_height(cluster.distance) - vertical_margins/2+height), str(round(cluster.distance, 2)), fill=(255, 0, 0))
-    
-    print_cluster(cluster_list[-1], 1, draw, cluster_list[-1].distance)
-    
-    image.show()
-
-
- 
 
 
 data2 = [["A", 1, 1, 1, 0, 1, 0, 0, 1, 1, 1], 
@@ -337,6 +239,7 @@ data = [["S", 0, 2, 9, 14, 2, 72, 4.8, 3.5],
 
 
 
+
 lalalala = reader(open("..\\Python\\features.csv"))
 
 my_other_data = []
@@ -363,7 +266,10 @@ for oeoeoe in cluster_list:
     print(oeoeoe.distance, " left: ",  (oeoeoe.left.label if oeoeoe.left is not None else 0),  "right: ", (oeoeoe.right.label if oeoeoe.right is not None else 0))
 
 print(len(cluster_list))
-print_dendrogram(cluster_list, instances_num)
+
+diagram = Diagram()
+diagram.print_dendrogram(cluster_list, instances_num)
+
 
 """
 cluster_list, instances_num = agglomerative_clustering(data2)

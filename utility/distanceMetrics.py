@@ -23,7 +23,7 @@ from utility.general import standard_deviation,pick_up_all_data_columns
 
 
 def jaccard_index(cluster1, cluster2):
-    """Non-euclidean distance calculator, used for categorical data. Data concern presence - absence so their values is either 0 or 1."""
+    """Non-euclidean distance calculator, used for categorical data. Data concern presence - absence so their values are either 0 or 1."""
     if len(cluster1.list_of_attributes) != len(cluster2.list_of_attributes):
         print("The two points must be defined in the same dimensional space")
         return
@@ -73,7 +73,7 @@ def standardised_euclidean_distance(data,cluster1, cluster2):
 
 
 def chi_square_distance(data, cluster1, cluster2):
-    """This distance metric is used for categorical data."""
+    """This distance metric is used only for categorical data."""
     
     if len(cluster1.list_of_attributes) != len(cluster2.list_of_attributes):
         print("The two points must be defined in the same dimensional space.")
