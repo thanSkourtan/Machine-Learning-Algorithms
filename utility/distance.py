@@ -4,18 +4,19 @@ This module includes the following distance utility functions:
 
 jaccard_index(cluster1,cluster2)
 euclidean_distance(cluster1,cluster2)
-
-Each functions takes two cluster objects as parameters and returns a double value.
+standardised_euclidean_distance(data,cluster1,cluster2)
 
 @author: than_skourtan
 """
 
 """
 TODO: examine if the paremeters, which are clusters, need to be changed in order the utility distance functions to apply to more
-general situations.
+general situations. Matlab pdist function uses the data array to return the similarity matrix
 """
 
 from math import sqrt
+from utility.general import mean,standard_deviation,pick_up_all_data_columns 
+
 
 def jaccard_index(cluster1, cluster2):
     """Non-euclidean distance calculator, used for categorical data. Data concern presence - absence so their values is either 0 or 1."""
@@ -35,7 +36,7 @@ def jaccard_index(cluster1, cluster2):
 
     
 def euclidean_distance(cluster1, cluster2):
-    """Calculates the euclidean distance of two clusters in the n-dimensional space, defined by the number of their attributes."""
+    """Calculates the euclidean distance of two clusters in the n-dimensional space, which is defined by the number of their attributes."""
     if len(cluster1.list_of_attributes) != len(cluster2.list_of_attributes):
         print("The two points must be defined in the same dimensional space.")
         return
@@ -46,42 +47,28 @@ def euclidean_distance(cluster1, cluster2):
     return sqrt(sum_of_squares)
 
     
-def standardised_euclidean_distance(cluster1, cluster2):
-    """Calculates the euclidean distance of two clusters in the n-dimensional space, defined by the number of their attributes."""
+def standardised_euclidean_distance(data,cluster1, cluster2):
+    """Returns the euclidean distance of two clusters in the n-dimensional space, which is defined by the number of their attributes, 
+       weighted by the inverse of the corresponding attribute's variance.
+    """
     if len(cluster1.list_of_attributes) != len(cluster2.list_of_attributes):
         print("The two points must be defined in the same dimensional space.")
         return
     
-    weight = 15.615
+    column_list = pick_up_all_data_columns(data)
+    
+    std_list = []
+    for i,column in enumerate(column_list):
+        if i != 0:
+            std_list.append(standard_deviation(column))
+    
     sum_of_squares = 0.0
     for i in range(0, len(cluster1.list_of_attributes)):
-        sum_of_squares += 1/weight * pow(cluster1.list_of_attributes[i] - cluster2.list_of_attributes[i], 2)
+        sum_of_squares += 1/pow(std_list[i],2) * pow(cluster1.list_of_attributes[i] - cluster2.list_of_attributes[i], 2) #the weight here is the variance not the std
     return sqrt(sum_of_squares)
 
 
 
-
-def mean(data_list):
-    '''
-    finds the mean of a list 
-    '''
-    return sum(data_list)/float(len(data_list))
-
-def standard_deviation(data_list):
-    '''
-    finds the standard deviation of a list
-    '''
-    mean_of_list = round(mean(data_list), 3)
-    sum_of_squares = 0.0
-    for value in data_list:
-        sum_of_squares += round(pow(value - mean_of_list, 2), 3)
-    #return sqrt(sum_of_squares/(len(data_list)-1))
-    return (sum_of_squares/(len(data_list)-1))
-
-
-lala = [-0.156,0.036,-0.998,-0.668,-0.860,1.253,-1.373,-0.860,-0.412,-0.348,-1.116,0.613,-1.373,0.549,1.637,0.613,1.381,-0.028,0.292,-0.092,-0.988,-1.309,1.317,-0.668,1.445,0.228,0.677,1.125,-1.501,1.573]
-
-print(standard_deviation(lala))
 
 class Cluster:
     
@@ -92,10 +79,45 @@ class Cluster:
 cluster1 = Cluster([51,6.0,3.0])
 cluster2 = Cluster([99,1.9,2.9])
 
-oe1 = standardised_euclidean_distance(cluster1,cluster2)
-oe2 = euclidean_distance(cluster1,cluster2)
+
+
+'''sample data'''
+data = [["S", 72, 4.8, 3.5],  
+        ["C", 75, 2.8, 2.5],  
+        ["C", 59, 5.4, 2.7],  
+        ["S",  64, 8.2, 2.9],  
+        ["C", 61, 3.9, 3.1],  
+        ["G",  94, 2.6, 3.5],  
+        ["S",  53, 4.6, 2.9],  
+        ["C", 61, 5.1, 3.3],  
+        ["C",68, 3.9, 3.4],  
+        ["S",  69, 10.0, 3.0],  
+        ["C", 57, 6.5, 3.3],  
+        ["S",  84, 3.8, 3.1],  
+        ["S",  53, 9.4, 3.0],  
+        ["C", 83, 4.7, 2.5],  
+        ["C",  100, 6.7, 2.8],  
+        ["G",  84, 2.8, 3.0],  
+        ["C", 96, 6.4, 3.1],  
+        ["G",  74, 4.4, 2.8],  
+        ["S",  79, 3.1, 3.6],  
+        ["S",  73, 5.6, 3.0],  
+        ["C",  59, 4.3, 3.4],  
+        ["S",  54, 1.9, 2.8],  
+        ["G", 95, 2.4, 2.9],  
+        ["C",  64, 4.3, 3.0],  
+        ["G", 97, 2.0, 3.0],  
+        ["S", 78, 2.5, 3.4],  
+        ["G", 85, 2.1, 3.0],  
+        ["G",  92, 3.4, 3.3],  
+        ["S",  51, 6.0, 3.0],  
+        ["G",  99, 1.9, 2.9]]
+
+
+
+oe1 = standardised_euclidean_distance(data,cluster1,cluster2)
 print(oe1)
-print(oe2)
+
 
 
 
