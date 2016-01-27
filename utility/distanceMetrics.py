@@ -15,11 +15,11 @@ their attributes.
 
 """
 TODO: examine if the paremeters, which are clusters, need to change in order the utility distance functions to apply to more
-general situations. Matlab pdist function uses the data array to return the similarity matrix.
+general situations. Matlab pdist function gets passed the data array to return the similarity matrix.
 """
 
 from math import sqrt
-from utility.general import mean,standard_deviation,pick_up_all_data_columns 
+from utility.general import standard_deviation,pick_up_all_data_columns 
 
 
 def jaccard_index(cluster1, cluster2):
@@ -38,7 +38,7 @@ def jaccard_index(cluster1, cluster2):
             denominator += 1
     return 1 - nominator/denominator
 
-    
+
 def euclidean_distance(cluster1, cluster2):
     """Calculates the euclidean distance of two clusters in the n-dimensional space, which is defined by the number of their attributes."""
     if len(cluster1.list_of_attributes) != len(cluster2.list_of_attributes):
@@ -50,7 +50,7 @@ def euclidean_distance(cluster1, cluster2):
         sum_of_squares += pow(cluster1.list_of_attributes[i] - cluster2.list_of_attributes[i], 2)
     return sqrt(sum_of_squares)
 
-    
+
 def standardised_euclidean_distance(data,cluster1, cluster2):
     """Returns the euclidean distance of two clusters in the n-dimensional space, which is defined by the number of their attributes, 
        weighted by the inverse of the corresponding attribute's variance.
@@ -105,56 +105,6 @@ def chi_square_distance(data, cluster1, cluster2):
     for i in range(0, len(cluster1_list)):
         sum_of_squares += (1/average_profiles[i]) * pow(cluster1_list[i] - cluster2_list[i], 2)
     return sqrt(sum_of_squares)
-    
-
-class Cluster:
-    
-    def __init__(self,my_list):
-        self.list_of_attributes = my_list
-        
-        
-cluster1 = Cluster([0, 10, 9, 8, 0])
-cluster2 = Cluster([32, 26, 0, 23, 0])
-
-
-
-
-'''sample data'''
-data = [["S", 0, 2, 9, 14, 2],  
-        ["C", 26, 4, 13, 11, 0],  
-        ["C", 0, 10, 9, 8, 0],  
-        ["S", 0, 0, 15, 3, 0],  
-        ["C", 13, 5, 3, 10, 7],  
-        ["G", 31, 21, 13, 16, 5],  
-        ["S", 9, 6, 0, 11, 2],  
-        ["C", 2, 0, 0, 0, 1],  
-        ["C", 17, 7, 10, 14, 6],  
-        ["S", 0, 5, 26, 9, 0],  
-        ["C", 0, 8, 8, 6, 7],  
-        ["S", 14, 11, 13, 15, 0],  
-        ["S", 0, 0, 19, 0, 6],  
-        ["C", 13, 0, 0, 9, 0],  
-        ["C", 4, 0, 10, 12, 0],  
-        ["G", 42, 20, 0, 3, 6],  
-        ["C", 4, 0, 0, 0, 0],  
-        ["G", 21, 15, 33, 20, 0],  
-        ["S", 2, 5, 12, 16, 3],  
-        ["S", 0, 10, 14, 9, 0],  
-        ["C", 8, 0, 0, 4, 6],  
-        ["S", 35, 10, 0, 9, 17],  
-        ["G", 6, 7, 1, 17, 10],  
-        ["C", 18, 12, 20, 7, 0],  
-        ["G", 32, 26, 0, 23, 0],  
-        ["S", 32, 21, 0, 10, 2],  
-        ["G", 24, 17, 0, 25, 6],  
-        ["G", 16, 3, 12, 20, 2],  
-        ["S", 11, 0, 7, 8, 0],  
-        ["G", 24, 37, 5, 18, 1]]
-
-
-
-oe1 = chi_square_distance(data,cluster1,cluster2)
-print(oe1)
 
 
 
