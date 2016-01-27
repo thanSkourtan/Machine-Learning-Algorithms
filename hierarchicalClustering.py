@@ -13,13 +13,11 @@ class Cluster():
     '''
     distance is the value of the vertical axis. at the beginning this value is 0 for all clusters.
     x1 and *args refer to the attributes to be used to clusterize the sample data. Left and right 
-    are the children nodes of the dendrogram. Does it need parent node???? for *attributes please
-    see https://www.python.org/dev/peps/pep-3102/
+    are the children nodes of the dendrogram. 
     '''
-    def __init__(self, *attributes, left=None, right=None, distance=0.0, idn=None, label=None, left_top_corner_x_coordinate=None):
-        self.list_of_attributes= []
-        for attribute in attributes:
-            self.list_of_attributes.append(attribute)
+    def __init__(self, attributes=None, left=None, right=None, distance=0.0, idn=None, label=None, left_top_corner_x_coordinate=None):
+
+        self.list_of_attributes = attributes 
         
         self.left = left
         self.right = right
@@ -105,10 +103,18 @@ def agglomerative_clustering(data, distance = euclidean_distance,linkage=max):
     
     """
     distances = {}
-    
+    cluster_list = []
     #cluster_list = [Cluster(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9], idn = i,label = row[10]) for i,row in enumerate(data)] # row[5], row[6], row[7] are the 3 attributes, if i want to pass other parameters i use keyword arguments instead of positional
     
-    cluster_list = [Cluster(row[1], row[2], idn = i,label = row[0]) for i, row in enumerate(data)] 
+    #cluster_list = [Cluster(row[1], row[2], idn = i,label = row[0]) for i, row in enumerate(data)] 
+    
+    
+    
+    #cluster_list = [Cluster(label = row[0],) for i,row in enumerate(data)]
+    
+    for i,row in enumerate(data):
+        cluster_list.append(Cluster([attribute_value for j,attribute_value in enumerate(row) if j != 0],idn = i, label = row[0]))
+    
     
     instances_num = len(cluster_list)
     
@@ -302,13 +308,13 @@ def print_dendrogram(cluster_list, instances_num):
  
 
 
-data2 = [[1, 1, 1, 0, 1, 0, 0, 1, 1, 1, "A"], 
-         [1, 1, 0, 1, 1, 0, 0, 0, 0, 1, "B"],  
-         [0, 1, 1, 0, 1, 0, 0, 1, 0, 0, "C"],  
-         [0, 0, 0, 1, 0, 1, 0, 0, 0, 0, "D"],  
-         [1, 1, 1, 0, 1, 0, 1, 1, 1, 0, "E"],  
-         [0, 1, 0, 1, 1, 0, 0, 0, 0, 1, "F"],  
-         [0, 1, 1, 0, 1, 1, 0, 1, 1, 0, "G"]]
+data2 = [["A", 1, 1, 1, 0, 1, 0, 0, 1, 1, 1], 
+         ["B", 1, 1, 0, 1, 1, 0, 0, 0, 0, 1],  
+         ["C", 0, 1, 1, 0, 1, 0, 0, 1, 0, 0],  
+         ["D", 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],  
+         ["E", 1, 1, 1, 0, 1, 0, 1, 1, 1, 0],  
+         ["F", 0, 1, 0, 1, 1, 0, 0, 0, 0, 1],  
+         ["G", 0, 1, 1, 0, 1, 1, 0, 1, 1, 0]]
 
 
 '''sample data'''
@@ -374,5 +380,9 @@ for oeoeoe in cluster_list:
 print(len(cluster_list))
 print_dendrogram(cluster_list, instances_num)
 
+"""
+cluster_list, instances_num = agglomerative_clustering(data2)
+print_dendrogram(cluster_list,instances_num)
 
+"""
 #divisive_clustering(data2)
