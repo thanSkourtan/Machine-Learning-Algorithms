@@ -1,7 +1,6 @@
-'''
+''' Contains the declaration of the cluster class and the implementation of the agglomerative clustering algorithm.
 @author: than_skourtan
 '''
-
 
 from sys import float_info
 from copy import copy
@@ -11,15 +10,23 @@ from utility.general import standard_deviation, mean
 from utility.diagrams import Diagram
 
 class Cluster():
-    '''
-    distance is the value of the vertical axis. at the beginning this value is 0 for all clusters.
-    x1 and *args refer to the attributes to be used to clusterize the sample data. Left and right 
-    are the children nodes of the dendrogram. 
-    '''
+    """Class(Structure) that represents a cluster.
+    
+    Attributes:
+        list_of_attributes(list): a list of cluster's data attributes.
+        left(Cluster): a pointer to the left child cluster.
+        right(Cluster): a pointer to the right child cluster.
+        distance(double): if the cluster has children, the distance is the distance of its children. Otherwise it is 0. Graphically, it is the
+            height of each cluster.
+        idn(int): the id number of the cluster
+        label(string or int): the label of the data. It is obligatory.
+        left_top_corner_x_coordinate(double): the x(horizontal) coordinate of the left top corner of the cluster shape (see print_cluster). It
+            is used only when building the dendrogram.
+    
+    """
     def __init__(self, attributes=None, left=None, right=None, distance=0.0, idn=None, label=None, left_top_corner_x_coordinate=None):
 
         self.list_of_attributes = attributes 
-        
         self.left = left
         self.right = right
         self.distance = distance
@@ -27,8 +34,91 @@ class Cluster():
         self.label = label
         self.left_top_corner_x_coordinate = left_top_corner_x_coordinate
 
+def agglomerative_clustering(data, distance = euclidean_distance,linkage=max):
+    """Constructs a binary tree of clusters.
+    The function contains the implementation of the agglomerative_clustering algorithm. 
+    
+    Parameters:
+        data(list): a two dimensional list representing the data. The first column must be the labels of the data. The other columns must be attributes.
+        distance (function object): a distance metric from the distanceMetrics module. Euclidean distance is the default value.
+        linkage(function object): 
+        
+    Returns: 
+        cluster_list(list): A binary tree represented by a list, containing all the clusters, starting from the lowest and ending at the top one.
+        instances_num(int): the size of the data (TODO: although it saves time getting it here, see if is better to take it at the print_dendrogram function)
+    
+    """
+    distances = {} #the dissimilarity matrix
+    cluster_list = [] #the binary tree of clusters
+    
+    for i,row in enumerate(data):
+        cluster_list.append(Cluster([attribute_value for j,attribute_value in enumerate(row) if j != 0],idn = i, label = row[0]))
+    
+    instances_num = len(cluster_list)
+    last_idn = cluster_list[-1].idn  #gets the last id number
+    
+    #build the distances array
+    for i in range(0, len(cluster_list)-1):
+            for j in range(i+1,len(cluster_list)):
+                distances[cluster_list[i].idn, cluster_list[j].idn]=distance(cluster_list[i], cluster_list[j])
+    
+    while(True):
+        shortest = float_info.max
+        shortest_cluster = ()
+        changed = False
+        #find the shortest distance
+        for i in range(0,len(cluster_list)-1):
+            if cluster_list[i].idn!=-1:
+                for j in range(i+1,len(cluster_list)):
+                    if cluster_list[j].idn!=-1:
+                        if distances[cluster_list[i].idn, cluster_list[j].idn] < shortest:
+                            shortest = distances[cluster_list[i].idn, cluster_list[j].idn] 
+                            shortest_cluster = (copy(cluster_list[i]), copy(cluster_list[j]))
+                            shortest_cluster_temp = cluster_list[i], cluster_list[j]
+                            position_in_cluster_list = (i, j)
+                            changed = True
+        if not changed: 
+            break
+        
+        #create a new cluster
+        temporary_cluster = Cluster(left = shortest_cluster_temp[0], right = shortest_cluster_temp[1], distance = shortest, idn= last_idn+1)            
+        last_idn +=1
+        
+        cluster_list[position_in_cluster_list[0]].idn=-1
+        cluster_list[position_in_cluster_list[1]].idn=-1
+        
+        #restructure the distances dictionary
+        temp_dictionary = {}
+        for cluster in cluster_list:
+            if cluster.idn!=-1:
+                low_first = min(cluster.idn, shortest_cluster[0].idn)
+                high_first = max(cluster.idn, shortest_cluster[0].idn)
+                low_second  = min(cluster.idn, shortest_cluster[1].idn)
+                high_second = max(cluster.idn, shortest_cluster[1].idn)
+                
+                temp_dictionary[cluster.idn, temporary_cluster.idn]=max(distances[low_first, high_first], distances[low_second, high_second])
+                del distances[low_first, high_first]
+                del distances[low_second, high_second]
+        
+        del distances[shortest_cluster[0].idn, shortest_cluster[1].idn] #TODO: see whether there is a less expensive way to do this, rather than deletion
+        
+        cluster_list.append(temporary_cluster)
+        distances.update(temp_dictionary)
+        
+    return cluster_list, instances_num
+
+
+
+##############################################################################################################################
+#ON GOING DEVELOPMENT
+
 
 def create_sets(N, total_sets,binary_array, i=0):
+    """Finds the subsets of a givet set.
+       
+       The number of a set's subsets is 2 ^ n, where n = amount of elements belong to the set. The function uses a divide and conquer algorithm
+       in order to represent the subsets to a binary array.
+    """
     if(sum(binary_array) == N-1 or i==N): return
     binary_array[i]=1
     total_sets.append(copy(binary_array))
@@ -93,91 +183,8 @@ def divisive_clustering(data2, cluster_list = []):
 
 
 
-
-def agglomerative_clustering(data, distance = euclidean_distance,linkage=max):
-    """
-    
-    parameters:
-    data The  
-    distance
-    linkage
-    
-    returns:
-    
-    """
-    distances = {}
-    cluster_list = []
-    
-    for i,row in enumerate(data):
-        cluster_list.append(Cluster([attribute_value for j,attribute_value in enumerate(row) if j != 0],idn = i, label = row[0]))
-    
-    instances_num = len(cluster_list)
-    
-    last_idn = cluster_list[-1].idn  #gets the last id number
-    
-    #build the distances array
-    for i in range(0, len(cluster_list)-1):
-            for j in range(i+1,len(cluster_list)):
-                distances[cluster_list[i].idn, cluster_list[j].idn]=distance(cluster_list[i], cluster_list[j])
-    
-    while(True):
-        shortest = float_info.max
-        shortest_cluster = ()
-        
-        changed = False
-        #find the shortest distance
-        for i in range(0,len(cluster_list)-1):
-            if cluster_list[i].idn!=-1:
-                for j in range(i+1,len(cluster_list)):
-                    if cluster_list[j].idn!=-1:
-                        if distances[cluster_list[i].idn, cluster_list[j].idn] < shortest: #shortest is used only here
-                            shortest = distances[cluster_list[i].idn, cluster_list[j].idn] 
-                            shortest_cluster = (copy(cluster_list[i]), copy(cluster_list[j]))
-                            shortest_cluster_temp = cluster_list[i], cluster_list[j]
-                            position_in_cluster_list = (i, j)
-                            changed = True
-        
-        if not changed: 
-            break
-        '''
-        TODO: TO REMOVE SHORTEST_CLUSTER_TEMP AND SEE WHAT THING COPY IN SHORTEST_CLUSTER AFFECTS
-        '''
-        #create a new cluster
-        
-        temporary_cluster = Cluster(left = shortest_cluster_temp[0], right = shortest_cluster_temp[1], distance = shortest, idn= last_idn+1)            
-        last_idn +=1
-                
-                
-        cluster_list[position_in_cluster_list[0]].idn=-1
-        cluster_list[position_in_cluster_list[1]].idn=-1
-        
-        
-        #we now restructure the distances dictionary
-        
-        temp_dictionary = {}
-        
-        for cluster in cluster_list:
-            if cluster.idn!=-1:
-                low_first = min(cluster.idn, shortest_cluster[0].idn)
-                high_first = max(cluster.idn, shortest_cluster[0].idn)
-                
-                low_second  = min(cluster.idn, shortest_cluster[1].idn)
-                high_second = max(cluster.idn, shortest_cluster[1].idn)
-                
-                temp_dictionary[cluster.idn, temporary_cluster.idn]=max(distances[low_first, high_first], distances[low_second, high_second])
-                del distances[low_first, high_first]
-                del distances[low_second, high_second]
-        
-        del distances[shortest_cluster[0].idn, shortest_cluster[1].idn]
-        
-        #insert the new cluster to the list
-        cluster_list.append(temporary_cluster)
-        
-        #merge the two dictionaries
-        distances.update(temp_dictionary)
-        
-        print("oe")
-    return cluster_list, instances_num
+#################################################################################################
+#TESTING
 
 
 

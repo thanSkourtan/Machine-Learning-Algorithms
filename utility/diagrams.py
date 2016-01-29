@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw
 
 class Diagram:
     
-    def __init__(self,horizontal_margins=100, height=700, vertical_margins=100, width = 1000, cluster_width = 40):
+    def __init__(self,horizontal_margins=100, height=6000, vertical_margins=100, width = 1000, cluster_width = 40):
         """The constructor provides some optional values for the diagram's attributes. Values are in pixels."""
         self.horizontal_margins = horizontal_margins
         self.height = height
@@ -113,6 +113,7 @@ class Diagram:
             draw(ImageDraw): An object to draw on the Image
             highest_cluster_distance(double): the distance attribute of the highest cluster, the one with the largest distance, which is also the last one
                 at the cluster_list
+            number_of_clusters: 
         
         Returns: 
             the current cluster and the first_available counter
@@ -122,7 +123,7 @@ class Diagram:
         cluster_height = lambda cluster_distance :  ((self.height - self.vertical_margins) * cluster_distance)/highest_cluster_distance
         
         #base case, first print the labels, then the first clusters
-        if cluster.left is None and cluster.right is None:
+        if (cluster.left is None and cluster.right is None):
             draw.text((self.horizontal_margins/2 + self.cluster_width * first_available, self.height - self.vertical_margins/2+6), 
                       str(cluster.label), fill=(0, 0, 0))
             cluster.left_top_corner_x_coordinate = self.horizontal_margins/2 + self.cluster_width * first_available
