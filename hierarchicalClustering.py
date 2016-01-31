@@ -1,6 +1,6 @@
-''' Contains the declaration of the cluster class and the implementation of the agglomerative clustering algorithm.
+""" Contains the declaration of the cluster class and the implementation of the agglomerative clustering algorithm.
 @author: than_skourtan
-'''
+"""
 
 from sys import float_info
 from copy import copy
@@ -25,7 +25,6 @@ class Cluster():
     
     """
     def __init__(self, attributes=None, left=None, right=None, distance=0.0, idn=None, label=None, left_top_corner_x_coordinate=None):
-
         self.list_of_attributes = attributes 
         self.left = left
         self.right = right
