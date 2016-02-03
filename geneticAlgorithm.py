@@ -51,27 +51,61 @@ def crossover_procedure(parent1, parent2):
             ancestor.binary_array[i] = parent2.binary_array[i]
     return ancestor
 
+
+def mutate_procedure(individual):
+    no_of_bits_to_reverse = 3
+    random_positions_list = set()
+    while len(random_positions_list) != no_of_bits_to_reverse:
+        random_position = randint(0,individual.individual_size-1)
+        random_positions_list.add(random_position)
+    
+    for position in random_positions_list:
+        if individual.binary_array[position] == 0:
+            individual.binary_array[position] = 1    
+        else:
+            individual.binary_array[position] = 0
+    
+    return individual
+        
+
+
 def generic_algorithm(fitness_function, fitness_threshold, population, crossover_rate,mutation_rate):
-    # create a new, uninitialized generation
-    new_population = Population(population.population_size,population.population_list[0].individual_size, False)
+    
     # evaluate 
     evaluation_list = [fitness_function(individual) for individual in population.population_list]
+    final_population = None
     
     while max(evaluation_list) < fitness_threshold: #fitness_threshold in the testing example is 1
-        
+        # create a new, uninitialized generation
+        cross_over_population = Population(population.population_size,population.population_list[0].individual_size, False)
+        #crossover
         for i, individual in enumerate(population.population_list):
             if crossover_rate > random(): # this happens at 95% of times
                 # build  
                 parent1 = individual
                 parent2 = population.population_list[roulette_wheel_individual_selection(evaluation_list)]
                 ancestor = crossover_procedure(parent1, parent2) 
-                new_population.population_list[i] = ancestor
+                cross_over_population.population_list[i] = ancestor
             else: #this happens at 5% of times
                 #add it to the new_population
-                new_population.population_list[i] = individual
+                cross_over_population.population_list[i] = individual
         
+        # create a new, uninitialized generation
+        mutate_population = Population(population.population_size,population.population_list[0].individual_size, False)
+        #mutation
+        for i, individual in enumerate(cross_over_population.population_list):
+            if mutation_rate > random(): # this happens at 20% of times
+                # build
+                mutate_population.population_list[i] = mutate_procedure(individual)
+                
+            else:
+                mutate_population.population_list[i] = individual
         
+        evaluation_list = [fitness_function(individual) for individual in mutate_population.population_list]
+        final_population = mutate_population
         
+        for indi in final_population.population_list:
+            print(indi.binary_array)
     
 
 
