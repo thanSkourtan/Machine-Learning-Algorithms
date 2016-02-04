@@ -6,7 +6,6 @@
 from random import random
 from geneticAlgorithms.selectors import roulette_wheel_individual_selection
 from geneticAlgorithms.encodings import Binary_encoding, Permutation_encoding
-from geneticAlgorithms.geneticAlgorithm import Population
 
 
 def uniform_crossover(crossover_rate, population, cross_over_population, evaluation_list):
@@ -62,12 +61,7 @@ def ordered_crossover(crossover_rate, population, cross_over_population, evaluat
     return cross_over_population
     
     
-#########
-# TESTING
-pop = Population(10,15)
-cross_over_population = Population(pop.population_size,pop.population_list[0].individual_size, False)
-ordered_crossover(0.95,pop,)
-        
+
         
         
         

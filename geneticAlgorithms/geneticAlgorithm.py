@@ -4,10 +4,11 @@
 
 """
 
-
+from random import random
 from geneticAlgorithms.crossovers import uniform_crossover
 from geneticAlgorithms.mutators import bit_string_mutation
 from geneticAlgorithms.encodings import Binary_encoding
+from geneticAlgorithms.fitnessFunctions import fitness_function, City
 
 class Population:
     """Represents a population of individuals"""
@@ -15,10 +16,6 @@ class Population:
         self.population_size = population_size
         self.population_list = [(Binary_encoding(individual_list) if initialization == True else None) for i in range(population_size)]
                 
-
-def fitness_function(individual):
-    """Assigns an evaluation score to each solution"""
-    return sum(individual.individual_list)/individual.individual_size
 
 
 
@@ -53,10 +50,23 @@ def generic_algorithm(fitness_function, fitness_threshold, population, crossover
 #===============================================================================
 
 #i = Binary_array(10)
-
+'''
 p = Population(10,15)
 
 for i in p.population_list:
     print(i.individual_list)
 
 generic_algorithm(fitness_function,1,p,0.95,0.2)
+'''
+
+
+cities = [City(int(random() * 10), int(random() * 10), i) for i in range(10)]
+
+
+
+
+
+
+
+
+
