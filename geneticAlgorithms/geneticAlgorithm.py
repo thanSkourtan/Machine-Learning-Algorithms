@@ -57,10 +57,9 @@ def generic_algorithm(fitness_function, fitness_threshold, population, crossover
         #evaluation_list = [fitness_function(individual) for individual in mutate_population.population_list] 1o provlima
         current_population = mutate_population
         
-        
         evaluation_list = evaluation(current_population, cities)
         
-        print("The shortest distance is " , 1/max(evaluation_list), "and the route is ")#, current_population.population_list[0].individual_list)
+        print("The shortest distance is " , 1/max(evaluation_list), "and the route is ", current_population.population_list[0].individual_list)
         
         generations += 1
     
@@ -71,13 +70,13 @@ def generic_algorithm(fitness_function, fitness_threshold, population, crossover
 
 #i = Binary_array(10)
 
-p = Population(10,10)
+p = Population(10,100)
 
 for i in p.population_list:
     print(i.individual_list)
 
 
-cities = [City(random() * 10, random() * 10, i) for i in range(10)]
+cities = [City(random() * 100, random() * 100, i) for i in range(100)]
 generic_algorithm(fitness_function,1,p,0.95,0.6,cities,1)
 
 

@@ -20,13 +20,15 @@ def fitness_TSP(individual, cities):
     total_distance = 0
     previous_city = None
     current_city = None
+    first_city = None
     for i, city_id in enumerate(individual.individual_list):
         if i == 0:
-            previous_city = cities[city_id] # first city in individual 
+            previous_city= cities[city_id] # first city in individual 
+            first_city = cities[city_id]
         elif i == (individual.individual_size-1): # last city in individual
             current_city = cities[city_id]
             total_distance += euclidean_distance(previous_city, current_city)
-            total_distance += euclidean_distance(current_city, cities[0]) #distance from last to first
+            total_distance += euclidean_distance(current_city, first_city) #distance from last to first
         else:
             current_city = cities[city_id]
             total_distance += euclidean_distance(previous_city, current_city)
@@ -47,9 +49,9 @@ class City:
         
 ##########
 #TESTING
-
+"""
 class Population:
-    """Represents a population of individuals"""
+    '''Represents a population of individuals'''
     def __init__(self,population_size,individual_list, initialization = True):
         self.population_size = population_size
         self.population_list = [(Permutation_encoding(individual_list) if initialization == True else None) for i in range(population_size)]
@@ -61,7 +63,7 @@ cities = [City(int(random() * 10), int(random() * 10), i) for i in range(populat
 lala = [fitness_TSP(individual, cities) for individual in population.population_list]
 
 print(lala)
-
+"""
 
 
 
