@@ -12,8 +12,13 @@ from PIL import Image, ImageDraw
 
 class Diagram:
     
-    def __init__(self,horizontal_margins=100, height=6000, vertical_margins=100, width = 1000, cluster_width = 40):
-        """The constructor provides some optional values for the diagram's attributes. Values are in pixels."""
+    def __init__(self,horizontal_margins=100, height=700, vertical_margins=100, width = 1000, cluster_width = 40):
+        """The constructor provides some optional values for the diagram's attributes. Values are in pixels.
+        
+        horizontal_margins = the total length of margins. for example when horizontal_margins =100 then left_margin = right_margin = 50
+        vertical_margins = vertical margins on the other hand are part or the width. so height 700 includes the vertical_margins. TODO: fix it.
+        
+        """
         self.horizontal_margins = horizontal_margins
         self.height = height
         self.vertical_margins = vertical_margins
@@ -21,7 +26,7 @@ class Diagram:
         self.cluster_width = cluster_width
         
         
-    def plot_point(self, x_axis, y_axis):
+    def plot_point(self, x_axis, y_axis, r = 2):
         """Plots the points indicated by the coordinates x, y, passed as parameters."""
         if len(x_axis) != len(y_axis):
             print("The x_axis length must be equal to the y_axis length")
@@ -33,22 +38,40 @@ class Diagram:
         
         #x-axis
         draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.width+ self.horizontal_margins/2, 
-                   self.height - self.vertical_margins/2), fill=(255, 0, 0))
+                   self.height - self.vertical_margins/2), fill=(0, 0, 0))
         
         #y-axis
-        draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.horizontal_margins/2, self.vertical_margins/2), fill=(255, 0, 0))
+        draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.horizontal_margins/2, self.vertical_margins/2), fill=(0, 0, 0))
         
         largest_x = max(x_axis)
         largest_y = max(y_axis)
         
         #uses the rule of three 
-        point_height = lambda y : (self.height - self.vertical_margins) * y/largest_y
-        point_width = lambda x : (self.width - self.horizontal_margins) * x/largest_x
-        
-        r=5
+        point_height = lambda y : self.vertical_margins/2 + (self.height - self.vertical_margins) * (1 - y/largest_y)  #because y-axis is reversed
+        point_width = lambda x :  self.horizontal_margins/2 + (self.width * x/largest_x) # because the largest x will have width equal to width - hor_margins/2
         
         for i in range(len(x_axis)):
             draw.ellipse(( point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r),fill=(255,0,0))
+        
+        
+        
+        ################################################ lines for TSP
+        x_first = -1
+        y_first = -1
+        for i in range(len(x_axis)):
+            if i == 0: # if first 
+                x_previous = x_axis[i]
+                y_previous = y_axis[i]
+                x_first = x_axis[i]
+                y_first = y_axis[i]
+            elif i == (len(x_axis) - 1):
+                draw.line((point_width(x_axis[i]),point_height(y_axis[i]), point_width(x_previous), point_height(y_previous)), fill=(255, 0, 0))
+                draw.line((point_width(x_axis[i]),point_height(y_axis[i]), point_width(x_first), point_height(y_first)), fill=(255, 0, 0))
+            else:
+                draw.line((point_width(x_axis[i]),point_height(y_axis[i]), point_width(x_previous), point_height(y_previous)), fill=(255, 0, 0))
+                x_previous = x_axis[i]
+                y_previous = y_axis[i]
+        
         
         
         #print the y-values of all points
@@ -97,6 +120,7 @@ class Diagram:
         
         self.__print_cluster(cluster_list[-1], 1, draw, cluster_list[-1].distance)
         
+      
         image.show()
             
     def __print_cluster(self, cluster, first_available, draw, highest_cluster_distance):
@@ -156,9 +180,12 @@ class Diagram:
             
             return cluster, first_available
             
-            
-x = [1, 2, 3, 4, 5]
-y = [10, 20, 30, 40, 50]
+######################
+#TESTING
+"""
+x = [0, 1, 2, 3, 4, 5]
+y = [0, 10, 20, 30, 40, 50]
  
 d = Diagram()
 d.plot_point(x, y)          
+"""

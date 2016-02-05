@@ -9,6 +9,8 @@ from geneticAlgorithms.crossovers import uniform_crossover, ordered_crossover
 from geneticAlgorithms.mutators import bit_string_mutation, swap_mutation
 from geneticAlgorithms.encodings import Binary_encoding, Permutation_encoding
 from geneticAlgorithms.fitnessFunctions import fitness_function, City, fitness_TSP
+from utility.diagrams import Diagram
+
 
 class Population:
     """Represents a population of individuals"""
@@ -19,15 +21,16 @@ class Population:
 
 
 def evaluation(population, cities):
+    #evaluation_list = [None] * population.population_list[0].individual_size
     evaluation_list = []
-    for individual in population.population_list:
+    for i, individual in enumerate(population.population_list):
         individual.fitness = fitness_TSP(individual, cities)
+        #evaluation_list[i] = individual.fitness
         evaluation_list.append(individual.fitness)
     
     evaluation_list = sorted(evaluation_list, reverse = True)
     population.population_list = sorted(population.population_list, key = lambda x:x.fitness, reverse = True)
     return evaluation_list
-
 
 
 def generic_algorithm(fitness_function, fitness_threshold, population, crossover_rate,mutation_rate, cities, elitism):
@@ -48,7 +51,7 @@ def generic_algorithm(fitness_function, fitness_threshold, population, crossover
         #uniform_crossover(crossover_rate, population, cross_over_population, evaluation_list, elitism) 1o provlima
         ordered_crossover(crossover_rate, current_population, cross_over_population, evaluation_list, elitism) 
               
-        # evaluation_list = evaluation(cross_over_population, cities)        
+        #evaluation_list = evaluation(cross_over_population, cities)        
         # mutation
         mutate_population = Population(cross_over_population.population_size,cross_over_population.population_list[0].individual_size, False)
         #bit_string_mutation(mutation_rate, cross_over_population, mutate_population, elitism) 1o problima
@@ -59,9 +62,20 @@ def generic_algorithm(fitness_function, fitness_threshold, population, crossover
         
         evaluation_list = evaluation(current_population, cities)
         
-        print("The shortest distance is " , 1/max(evaluation_list), "and the route is ", current_population.population_list[0].individual_list)
+        #print("The shortest distance is " , 1/max(evaluation_list), "and the route is ", current_population.population_list[0].individual_list)
         
         generations += 1
+        #################checking
+        #for i, oe in zip(current_population.population_list, evaluation_list):
+         #   print(i.individual_list, " " , 1/oe)
+        
+        
+        
+        '''for i in current_population.population_list:
+            print(i.individual_list)'''
+       # print("######################################################")
+        print(generations, "The shortest distance is " , 1/max(evaluation_list), "and the route is ");#, current_population.population_list[0].individual_list)
+    return current_population.population_list[0].individual_list
     
 
 #===============================================================================
@@ -70,16 +84,35 @@ def generic_algorithm(fitness_function, fitness_threshold, population, crossover
 
 #i = Binary_array(10)
 
-p = Population(10,100)
-
-for i in p.population_list:
-    print(i.individual_list)
+p = Population(100, 100)
 
 
-cities = [City(random() * 100, random() * 100, i) for i in range(100)]
-generic_algorithm(fitness_function,1,p,0.95,0.6,cities,1)
 
 
+cities = [City(int(random() * 100), int(random() * 100), i) for i in range(100)]
+
+
+best_route = generic_algorithm(fitness_function,1,p,0.95,0.001,cities,2)
+
+best_route_of_cities = []
+
+for city_idn in best_route:
+    for city in cities:
+        if city_idn == city.idn:
+            best_route_of_cities.append(city)
+
+
+
+
+x_axis = []
+y_axis = []
+for city in best_route_of_cities:
+    x_axis.append(city.x)
+    y_axis.append(city.y)
+    
+    
+d = Diagram()
+d.plot_point(x_axis,y_axis)    
 
 
 
