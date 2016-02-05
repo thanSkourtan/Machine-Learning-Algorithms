@@ -15,4 +15,5 @@ class Permutation_encoding:
     def __init__(self, individual_list_length):
         self.individual_size = individual_list_length
         self.individual_list = [i for i in range(0, individual_list_length)]
+        self.fitness = 0
 
