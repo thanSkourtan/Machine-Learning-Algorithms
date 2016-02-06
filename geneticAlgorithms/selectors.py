@@ -16,7 +16,7 @@ def roulette_wheel_individual_selection(evaluation_list):
             return individual_position
         
         
-def tournament_selection(population, tournament_size = 5):
+def tournament_selection(population, tournament_size = 15):
     
     random_individual_positions = []
     for i in range(tournament_size):
