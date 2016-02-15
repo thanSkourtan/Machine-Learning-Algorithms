@@ -3,6 +3,7 @@
 @author: than_skourtan
 
 """
+
 from random import random
 from geneticAlgorithms.crossovers import uniform_crossover, ordered_crossover
 from geneticAlgorithms.mutators import bit_string_mutation, swap_mutation
