@@ -10,7 +10,7 @@ from math import exp
 
 def sigmoid(number):
     """can take a number or a list of numbers"""
-    return 1 / 1 + exp(-number) #TODO: to change it
+    return 1 / (1 + exp(-number)) 
 
 
 def binary_step(number):
