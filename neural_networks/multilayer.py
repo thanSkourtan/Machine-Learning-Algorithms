@@ -13,7 +13,7 @@ from neural_networks.activation_functions import sigmoid, linear
 
 
 class Unit:
-    def __init__(self, layer, activate_function, incoming_weight_array = [], outgoing_weight_array = [], input_value = None):
+    def __init__(self, layer, activate_function, incoming_weight_array = np.array([]), outgoing_weight_array = np.array([]), input_value = None): #TODO: delete the input value
         self.incoming_weight_array = incoming_weight_array
         self.outgoing_weight_array = outgoing_weight_array
         self.input_value = input_value
@@ -35,15 +35,6 @@ class Layer:
 
 class Network:
     
-    incoming_weight_array1 = np.array([[0.2], [-0.1], [0.4]])
-    incoming_weight_array2 = np.array([[0.7], [-1.2], [1.2]])
-    
-    incoming_weight_array3 = np.array([[1.1],[0.1]])
-    incoming_weight_array4 = np.array([[3.1],[1.17]])
-    
-    outgoing_weight_array1 =  np.array([[1.1],[3.1]])
-    outgoing_weight_array2 = np.array([[0.1],[1.17]])
-    
     def __init__(self, learning_rate, output_array, target_array, number_of_units_in_layer):
         self.learning_rate = learning_rate
         self.number_of_units_in_layer = number_of_units_in_layer
@@ -54,29 +45,39 @@ class Network:
         
         self.target_array = target_array
         
+        #produces a uniformly distributed number between [0,1)
+        random_weight_values = lambda number_of_rows : 2 * np.random.random_sample((number_of_rows, 1)) - 1
+        
+        #finds number of units in previous layers
+        previous_layers_units = lambda current_layer : number_of_units_in_layer[current_layer - 1][0]
+        
         #build the units
-        for layer in number_of_units_in_layer.items():
-            if layer[0] == 1:
-                for unit in range(layer[1][0]):
-                    self.units.append(Unit(layer[0], layer[1][1], outgoing_weight_array = np.array([[0.2],[0.7]]))) 
-            elif layer[0] == 2:
-                counter1 = 0
-                for unit in range(layer[1][0]):
-                    if counter1 == 0:
-                        self.units.append(Unit(layer[0], layer[1][1], incoming_weight_array = self.incoming_weight_array1, outgoing_weight_array = self.outgoing_weight_array1))
-                        counter1 += 1
-                    else: 
-                        self.units.append(Unit(layer[0], layer[1][1], incoming_weight_array = self.incoming_weight_array2, outgoing_weight_array = self.outgoing_weight_array2))
-            elif layer[0] == 3:
-                counter1 = 0
-                for unit in range(layer[1][0]):
-                    if counter1 == 0:
-                        self.units.append(Unit(layer[0], layer[1][1], incoming_weight_array = self.incoming_weight_array3))
-                        counter1 += 1
-                    else: 
-                        self.units.append(Unit(layer[0], layer[1][1], incoming_weight_array = self.incoming_weight_array4))
-                        
-                        
+        for current_layer, current_layer_data in number_of_units_in_layer.items():    
+            if current_layer == 1:               #the first layer                                    
+                for j in range(current_layer_data[0]):
+                    self.units.append(Unit(current_layer, current_layer_data[1])) 
+            elif current_layer != len(self.layers): #any layer but the last
+                for i in range(current_layer_data[0]):
+                    self.units.append(Unit(current_layer,current_layer_data[1],incoming_weight_array = random_weight_values(previous_layers_units(current_layer))))
+                    
+                    current_unit = self.units[-1]
+                    counter = 0
+                    for j, corresponding_unit in enumerate(self.units): #add weight in previous, corresponding unit
+                        if corresponding_unit.layer == current_unit.layer - 1: #if we are at the previous layer
+                            corresponding_unit.outgoing_weight_array = np.append(corresponding_unit.outgoing_weight_array, current_unit.incoming_weight_array[counter])
+                            counter += 1
+                            continue
+                    
+            else:         #last layer
+                for i in range(current_layer_data[0]):
+                    self.units.append(Unit(current_layer, current_layer_data[1], incoming_weight_array = random_weight_values(previous_layers_units(current_layer))))
+                    current_unit = self.units[-1]
+                    counter = 0
+                    for j, corresponding_unit in enumerate(self.units): #add weight in previous, corresponding unit
+                        if corresponding_unit.layer == current_unit.layer - 1: #if we are at the previous layer
+                            corresponding_unit.outgoing_weight_array = np.append(corresponding_unit.outgoing_weight_array, current_unit.incoming_weight_array[counter])
+                            counter += 1
+                            continue
                         
         print("oe")  
         
@@ -123,7 +124,7 @@ class Network:
                 counter += 1
             if unit.layer == 1: #if we are the first layer skip
                 continue
-            for i, (weight, input_value) in enumerate(zip(unit.incoming_weight_array, self.layers[unit.layer -2].output_array)):
+            for i, (weight, input_value) in enumerate(zip(unit.incoming_weight_array, self.layers[unit.layer -2].output_array)): #i is the position of the unit at the layer
                 
                 new_weight = weight + self.learning_rate * unit.error * input_value 
                 unit.incoming_weight_array[i] = new_weight #change the weight in current unit
