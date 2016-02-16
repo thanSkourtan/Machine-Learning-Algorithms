@@ -4,8 +4,7 @@ Created
 @author: than_skourtan
 """
 import numpy as np
-import matplotlib
-
+from csv import reader
 from collections import OrderedDict
 from neural_networks.activation_functions import sigmoid, linear
 
@@ -41,8 +40,8 @@ class Network:
         self.units = [] #the units
         
         #build the layers, assigning the input values only to the first
-        self.layers = [Layer(output_array) if i == 0 else Layer() for i in range(len(number_of_units_in_layer))] #the layers
-        
+        self.layers = [Layer() if i == 0 else Layer() for i in range(len(number_of_units_in_layer))] #the layers
+        self.output_array = output_array
         self.target_array = target_array
         
         #produces a uniformly distributed number between [0,1)
@@ -79,36 +78,53 @@ class Network:
                             counter += 1
                             continue
                         
-        print("oe")  
+        print("initialization done")  
         
     
     
     
-    def forward_propagation(self):
+    def _forward_propagation(self, data_instance):
+        #clear all the layers output arrays
+        for layer in self.layers:
+            layer.output_array = []
+        
+        #load the first instance to the first layer
+        self.layers[0].output_array = data_instance
+        
+        
         for unit in self.units:
             if unit.layer != 1:
                 previous_layer = self.layers[unit.layer - 2] #for each layer we need the previous one
                 current_layer = self.layers[unit.layer - 1]
-                result = np.dot(previous_layer.output_array, unit.incoming_weight_array) 
+                result = np.around(np.dot(previous_layer.output_array, unit.incoming_weight_array), decimals = 8) 
                 output = unit.activate_function(result)
                 current_layer.output_array = np.append(current_layer.output_array, output) # append in np is static. it returns a new array
+                
                 unit.output = output #save it also at the unit
+                
+        print("the network's output is ", self.units[-1].output)
+        for i, unit in enumerate(self.units):
+            if i == 13:
+                print(i, "'s forw incoming: ", unit.incoming_weight_array)
+                print(i, "'s forw outgoing: ", unit.outgoing_weight_array)
+            
     
     
-    def backpropagation(self):
-        
+    def _backpropagation(self, target_instance):
+        #clear all the layers error arrays
+        for layer in self.layers:
+            layer.error_array = []
+            
         #calculate errors
-        counter = 0
         for unit in reversed(self.units):
             current_layer = self.layers[unit.layer - 1]
             if unit.layer == 1: #if we reach the first layer stop
                 break;
             elif unit.layer == len(self.layers): #if we are at the last layer
-                unit.error = unit.output * (1.0 - unit.output) * (self.target_array[counter] - unit.output)    
+                unit.error = np.around(unit.output * (1.0 - unit.output) * (target_instance - unit.output), decimals = 8)    
                 current_layer.error_array = np.insert(current_layer.error_array, 0, unit.error)
-                counter = 1
             else: #if we are at a hidden layer
-                unit.error = unit.output * (1.0 - unit.output) * np.dot(self.layers[unit.layer].error_array, unit.outgoing_weight_array) # error array of next layer and weight of current unit
+                unit.error = np.around(unit.output * (1.0 - unit.output) * np.dot(self.layers[unit.layer].error_array, unit.outgoing_weight_array), decimals = 10) # error array of next layer and weight of current unit
                 current_layer.error_array = np.insert(current_layer.error_array, 0,unit.error)
         
         
@@ -134,7 +150,22 @@ class Network:
                         break
             previous_layer = unit.layer 
         
+        for i, unit in enumerate(self.units):
+            if i == 13:
+                print(i, "'s back incoming: ", unit.incoming_weight_array)
+                print(i, "'s back outgoing: ", unit.outgoing_weight_array)
         
+        
+        
+        
+    def train(self):
+        lalo = 1
+        for data_instance, target_instance in zip(self.output_array, self.target_array):
+            print("instance ", lalo, " --------------------------------------------------------------------")
+            self._forward_propagation(data_instance)
+            self._backpropagation(target_instance)
+            lalo += 1
+            if lalo == 8: break
         
 
 
@@ -146,6 +177,44 @@ class Network:
 #===============================================================================
 
 
+housing = reader(open("..\\housing.csv"),delimiter=' ')
+targets = reader(open("..\\target.csv"),delimiter=' ')
+
+
+housing_data = [line for line in housing]
+housing_temp = []
+
+for i in range(len(housing_data)):
+    housing_temp += [row.split(";") for row in housing_data[i]]
+    
+for i in range(len(housing_temp)):
+    housing_temp[i] = [float(element) for element in housing_temp[i]]
+    
+final_housing_data = np.array(housing_temp)
+
+################
+target_data = [line for line in targets]
+
+for i in range(len(target_data)):
+    target_data[i] = [float(element) for element in target_data[i]]
+    
+    
+final_target_data = np.array(target_data)
+
+
+
+
+#represents the structure of the neural network
+number_of_units_in_layer = OrderedDict({1 : (13, linear) , 2: (10, sigmoid), 3 : (1, linear)})
+
+network = Network(0.1, final_housing_data, final_target_data, number_of_units_in_layer)
+
+network.train()
+
+
+print("oe")
+
+"""
 #represents the inputs
 input_array = np.array([(10), (30), (20)])
 target_array = [0,1]
@@ -155,12 +224,12 @@ number_of_units_in_layer = OrderedDict({1 : (3, linear) , 2: (2, sigmoid), 3 : (
 
 network = Network(0.1, input_array, target_array, number_of_units_in_layer)
 
-network.forward_propagation()
+network._forward_propagation()
 
-network.backpropagation()
+network._backpropagation()
 
 print("lala")
-
+"""
 
 
 
