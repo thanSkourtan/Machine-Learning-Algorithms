@@ -1,12 +1,12 @@
 """ Contains the declaration of the cluster class and the implementation of the agglomerative clustering algorithm.
-@author: than_skourtan
+@author: than_skourtank
 """
 
 from sys import float_info
 from copy import copy
 from csv import reader
 from utility.distanceMetrics import euclidean_distance
-from utility.general import standard_deviation, mean
+from utility.general import standard_deviation, mean, pick_up_column
 from utility.diagrams import Diagram
 
 class Cluster():
@@ -274,6 +274,7 @@ for oeoeoe in cluster_list:
 print(len(cluster_list))
 
 diagram = Diagram()
+#diagram.plot_point(pick_up_column(my_other_data, 1),pick_up_column(my_other_data, 2))
 diagram.print_dendrogram(cluster_list, instances_num)
 
 

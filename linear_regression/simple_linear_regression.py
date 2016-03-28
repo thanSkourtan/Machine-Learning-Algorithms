@@ -25,6 +25,8 @@ def fit(x_axis,y_axis):
 # TESTING
 #===============================================================================
 
+
+
 noise = [rand() for i in range(100)] 
 print(noise)
 

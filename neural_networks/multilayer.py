@@ -190,13 +190,13 @@ for i in range(len(housing_data)):
 for i in range(len(housing_temp)):
     housing_temp[i] = [float(element) for element in housing_temp[i]]
     
-final_housing_data = np.array(housing_temp)
+final_housing_data = np.array(np.around(housing_temp,5))
 
 ################
 target_data = [line for line in targets]
 
 for i in range(len(target_data)):
-    target_data[i] = [float(element) for element in target_data[i]]
+    target_data[i] = [round(float(element),5) for element in target_data[i]]
     
     
 final_target_data = np.array(target_data)
