@@ -1,8 +1,8 @@
-'''
+"""
 
 
-@author: thanos
-'''
+@author: than_skourtan
+"""
 
 from math import exp
 

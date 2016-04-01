@@ -56,7 +56,7 @@ class Diagram:
         
         
         ################################################ lines for TSP
-        x_first = -1
+        '''x_first = -1
         y_first = -1
         for i in range(len(x_axis)):
             if i == 0: # if first 
@@ -70,7 +70,7 @@ class Diagram:
             else:
                 draw.line((point_width(x_axis[i]),point_height(y_axis[i]), point_width(x_previous), point_height(y_previous)), fill=(255, 0, 0))
                 x_previous = x_axis[i]
-                y_previous = y_axis[i]
+                y_previous = y_axis[i]'''
         
         
         
