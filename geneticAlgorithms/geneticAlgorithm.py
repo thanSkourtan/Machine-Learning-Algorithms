@@ -181,7 +181,7 @@ for city in best_route_of_cities:
     
 """ 
 #d = Diagram()
-#d.plot_point(x_axis,y_axis)    
+#d.scatter_plot(x_axis,y_axis)    
 
 
 

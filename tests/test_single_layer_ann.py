@@ -20,7 +20,7 @@ class test_single_layer_ann(unittest.TestCase):
         y_axis = [i for i in range(1,16356)]
         price_data = [float(line.pop()) for line in prices]
         
-        d.plot_point(y_axis, price_data,1)
+        d.scatter_plot(y_axis, price_data,1)
         
         
         # format to input and target

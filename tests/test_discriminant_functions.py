@@ -3,6 +3,7 @@
 """
 
 import unittest
+import numpy as np
 from utility import diagrams
 from random import randint
 import linear_discriminant_functions.discriminant_functions_algorithms as dscrnt
@@ -15,21 +16,32 @@ class test_discriminant_functions(unittest.TestCase):
 
     def setUp(self):
         
+        
+        
         #builds the dataset
-        data_instances = [dscrnt.DataInstance([randint(0,100),randint(0,100)], "") for i in range(0,100)]
+        data_instances = [dscrnt.DataInstance(np.array([randint(0,100),randint(0,100)]), "") for i in range(0,100)]
         #sets up the classes based on the linear function y = 2x + 35
         for data_instance in data_instances:
-            if data_instance.feature_vector[-1] > (2*data_instance.feature_vector[1] + 35):
+            if data_instance.feature_vector[-1] > (2*data_instance.feature_vector[0] + 35):
                 data_instance.instance_class = "A"
             else:
                 data_instance.instance_class = "B"
         self.data_instances = data_instances
         
+        d = diagrams.Diagram()
+        d.scatter_plot(data_instances)
+        
         '''
         x_axis = [randint(0,100) for i in range(100)]
         y_axis = [(2*x+35) for x in x_axis]
         d = diagrams.Diagram()
-        d.plot_point(x_axis,y_axis);
+        d.scatter_plot(x_axis,y_axis);
+        
+        
+        x_axis = [randint(0,100) for i in range(100)]
+        y_axis = [(1*x+15) for x in x_axis]
+        d = diagrams.Diagram()
+        d.scatter_plot(x_axis,y_axis);
         '''
 
     def tearDown(self):

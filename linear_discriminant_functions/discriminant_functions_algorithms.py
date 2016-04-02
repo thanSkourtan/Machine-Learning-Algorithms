@@ -4,22 +4,9 @@ Least squares, fisher's linear discriminant and the perceptron algorithm. All th
 Recognition and Machine Learning By Bishop'
 @author: than_skourtan
 """
-
+import numpy as np
 from random import uniform
-
-class DataInstance():
-    
-    """A dataInstance is defined by its coordinates and the class it belongs to.
-    
-    Attributes: 
-        feature_vector(list): the feature vector  of a data instance.
-        point_class(string): the name of class the instance of the corresponding point belongs to.
-         
-    """
-    def __init__(self, feature_vector, instance_class):
-        self.feature_vector = feature_vector                   
-        self.instance_class = instance_class
-
+from linear_discriminant_functions.data_instance import DataInstance
 
 
 def perceptron_training_algorithm(data_instances, step = 0.1):
@@ -27,9 +14,17 @@ def perceptron_training_algorithm(data_instances, step = 0.1):
     Attributes:
         data_instances(list): list of objects of DataInstance type.
     """
-    decision_boundary_dimensions = len(data_instances.feature_vector) - 1
-    w = [uniform(1,100) for i in range(decision_boundary_dimensions + 1)]
-    print("debug")
+
+    #take a random weight vector
+    decision_boundary_dimensions = len(data_instances[0].feature_vector) - 1
+    
+    w = np.array([uniform(1,100) for i in range(decision_boundary_dimensions + 1)])
+    
+    #find the misclassified instances
+    misclassified_data = []
+    for data_instance in data_instances:
+        if  data_instance.feature_vector[-1] > np.dot(data_instance.feature_vector, np.transpose(w)) and data_instance.instance_class =='B':
+            misclassified_data.append()
 
 
 

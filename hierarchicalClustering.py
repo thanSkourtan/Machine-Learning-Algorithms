@@ -274,7 +274,7 @@ for oeoeoe in cluster_list:
 print(len(cluster_list))
 
 diagram = Diagram()
-#diagram.plot_point(pick_up_column(my_other_data, 1),pick_up_column(my_other_data, 2))
+#diagram.scatter_plot(pick_up_column(my_other_data, 1),pick_up_column(my_other_data, 2))
 diagram.print_dendrogram(cluster_list, instances_num)
 
 

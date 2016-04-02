@@ -10,6 +10,7 @@ __print_cluster
 from PIL import Image, ImageDraw
 
 
+
 class Diagram:
     
     def __init__(self,horizontal_margins=100, height=700, vertical_margins=100, width = 1000, cluster_width = 40):
@@ -25,24 +26,37 @@ class Diagram:
         self.width = width
         self.cluster_width = cluster_width
         
-        
-    def plot_point(self, x_axis, y_axis, r = 2):
-        """Plots the points indicated by the coordinates x, y, passed as parameters."""
-        if len(x_axis) != len(y_axis):
-            print("The x_axis length must be equal to the y_axis length")
-            return
-        
         # Create a new image with a white background
-        image=Image.new('RGB', (self.width + self.horizontal_margins, self.height), (255, 255, 255))
-        draw=ImageDraw.Draw(image)
+        self.image=Image.new('RGB', (self.width + self.horizontal_margins, self.height), (255, 255, 255))
+        self.draw=ImageDraw.Draw(self.image)
         
         #x-axis
-        draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.width+ self.horizontal_margins/2, 
+        self.draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.width+ self.horizontal_margins/2, 
                    self.height - self.vertical_margins/2), fill=(0, 0, 0))
         
         #y-axis
-        draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.horizontal_margins/2, self.vertical_margins/2), fill=(0, 0, 0))
+        self.draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.horizontal_margins/2, self.vertical_margins/2), fill=(0, 0, 0))
         
+        
+        
+    #def scatter_plot(self, x_axis = [], y_axis =[], data_instances = None, r = 2):
+    def scatter_plot(self, *args, r = 2):        
+        """Plots the points indicated by the coordinates x, y, passed as parameters."""
+        
+        argument_types = tuple(arg.__class__ for arg in args)
+        typemap = {(list, list):self.scatter_plot_axis, (list,) : self.scatter_plot_data_instances}
+        
+        if argument_types in typemap:
+            return typemap[argument_types](*args)
+        else:
+            print("Input a list of data instances or two lists with the x, y values")
+        
+    def scatter_plot_axis(self, x_axis = [], y_axis =[],  r = 2):
+        
+        if len(x_axis) != len(y_axis):
+            print("The x_axis length must be equal to the y_axis length")
+            return
+                
         largest_x = max(x_axis)
         largest_y = max(y_axis)
         
@@ -51,7 +65,7 @@ class Diagram:
         point_width = lambda x :  self.horizontal_margins/2 + (self.width * x/largest_x) # because the largest x will have width equal to width - hor_margins/2
         
         for i in range(len(x_axis)):
-            draw.ellipse(( point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r),fill=(255,0,0))
+            self.draw.ellipse(( point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r),fill=(255,0,0))
         
         
         
@@ -80,11 +94,19 @@ class Diagram:
                       str(round(cluster.distance, 2)), fill=(255, 0, 0))
         '''
         
-        image.show()
-        
+        self.image.show()
         
     
+    def scatter_plot_data_instances(self, data_instances, r = 2):
+        """Plots data instances"""
         
+        for data_instance in data_instances:
+            if data_instance.feature_vector.size != 2:
+                print("The data should have only 2 features.")
+                return
+        x_axis = [data_instance.feature_vector[0] for data_instance in data_instances]
+        y_axis = [data_instance.feature_vector[1] for data_instance in data_instances]
+        self.scatter_plot_axis(x_axis, y_axis)
 
     def print_dendrogram(self, cluster_list, instances_num):
         
@@ -180,12 +202,3 @@ class Diagram:
             
             return cluster, first_available
             
-######################
-#TESTING
-"""
-x = [0, 1, 2, 3, 4, 5]
-y = [0, 10, 20, 30, 40, 50]
- 
-d = Diagram()
-d.plot_point(x, y)          
-"""
