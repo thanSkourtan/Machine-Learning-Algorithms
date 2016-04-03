@@ -5,7 +5,7 @@
 import unittest
 from random import randint
 from utility import diagrams
-import linear_discriminant_functions.discriminant_functions_algorithms as dscrnt
+import data_instance as dscrnt
 import numpy as np
 
 class DiagramsTest(unittest.TestCase):
@@ -16,7 +16,7 @@ class DiagramsTest(unittest.TestCase):
         self.y_axis = [(2*x+35) for x in self.x_axis]
         
         #builds the data_instances
-        self.data_instances = [dscrnt.DataInstance(np.array([randint(0,100),randint(0,100)]), "") for i in range(0,100)]
+        self.data_instances = [dscrnt.DataInstance(np.array([randint(0,100),randint(0,100)]), "", randint(0, 100)) for i in range(0,100)]
         #sets up the classes based on the linear function y = 2x + 35
         for data_instance in self.data_instances:
             if data_instance.feature_vector[-1] > (2*data_instance.feature_vector[0] + 35):

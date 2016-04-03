@@ -51,7 +51,7 @@ class test_discriminant_functions(unittest.TestCase):
 
 
     def test_perceptron_training_algorithm(self):
-        dfa.perceptron_training_algorithm(self.data_instances)
+        dfa.perceptron_training_algorithm(self.data_instances, True)
         
 
 

@@ -8,10 +8,10 @@ __print_cluster
 @author: than_skourtan
 """
 from PIL import Image, ImageDraw
+from tkinter import *
 
 
-
-class Diagram:
+class Diagram():
     
     def __init__(self,horizontal_margins=100, height=700, vertical_margins=100, width = 1000, cluster_width = 40):
         """The constructor provides some optional values for the diagram's attributes. Values are in pixels.
@@ -20,26 +20,34 @@ class Diagram:
         vertical_margins = vertical margins on the other hand are part or the width. so height 700 includes the vertical_margins. TODO: fix it.
         
         """
+        
         self.horizontal_margins = horizontal_margins
         self.height = height
         self.vertical_margins = vertical_margins
         self.width = width
         self.cluster_width = cluster_width
         
+        self.root = Tk()
+        self.canvas = Canvas(self.root, bg = "white", height = self.height, width = self.width + self.horizontal_margins)
+        self.canvas.pack()
+        self.canvas.create_line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.width+ self.horizontal_margins/2, 
+                   self.height - self.vertical_margins/2), fill = "blue")
+        self.canvas.create_line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.horizontal_margins/2, 
+                                 self.vertical_margins/2), fill = "blue")
+        """
         # Create a new image with a white background
         self.image=Image.new('RGB', (self.width + self.horizontal_margins, self.height), (255, 255, 255))
         self.draw=ImageDraw.Draw(self.image)
-        
         #x-axis
         self.draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.width+ self.horizontal_margins/2, 
                    self.height - self.vertical_margins/2), fill=(0, 0, 0))
-        
         #y-axis
         self.draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.horizontal_margins/2, self.vertical_margins/2), fill=(0, 0, 0))
+        """
         
+
         
-        
-    #def scatter_plot(self, x_axis = [], y_axis =[], data_instances = None, r = 2):
+    
     def scatter_plot(self, *args, r = 2):        
         """Plots the points indicated by the coordinates x, y, passed as parameters."""
         
@@ -65,7 +73,8 @@ class Diagram:
         point_width = lambda x :  self.horizontal_margins/2 + (self.width * x/largest_x) # because the largest x will have width equal to width - hor_margins/2
         
         for i in range(len(x_axis)):
-            self.draw.ellipse(( point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r),fill=(255,0,0))
+            #self.draw.ellipse(( point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r),fill=(255,0,0))
+            self.canvas.create_oval(point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r, outline= "red", fill = "red")
         
         
         
@@ -93,8 +102,16 @@ class Diagram:
             draw.text((self.horizontal_margins/2 - 30, - cluster_height(cluster.distance) - self.vertical_margins/2 + self.height), 
                       str(round(cluster.distance, 2)), fill=(255, 0, 0))
         '''
-        
-        self.image.show()
+        #TODO: not working properly
+        if self.root.state() == 'normal':
+            self.root.mainloop()
+            print("oe")
+        else:
+            self.canvas.delete("all")
+            self.root.update()
+            
+            
+        #self.image.show()
         
     
     def scatter_plot_data_instances(self, data_instances, r = 2):

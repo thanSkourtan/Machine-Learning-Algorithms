@@ -6,10 +6,26 @@ Recognition and Machine Learning By Bishop'
 """
 import numpy as np
 from random import uniform
+from utility.diagrams import Diagram
 
 
 
-def perceptron_training_algorithm(data_instances, step = 0.1):
+
+def perceptron_wrapper(function):
+    def perceptron_visualize(*args):
+        if len(args) == 2 and args[1]==True:
+            d = Diagram()
+            d.root.after(2000,perceptron_training_algorithm)
+            d.scatter_plot(args[0])
+            function(args[0], True, d)
+        else:
+            function(args[0], False)
+    return perceptron_visualize
+            
+
+
+@perceptron_wrapper
+def perceptron_training_algorithm(data_instances, visualize, diagram = None, step = 0.1):
     """
     Attributes:
         data_instances(list): list of objects of DataInstance type.
@@ -37,6 +53,13 @@ def perceptron_training_algorithm(data_instances, step = 0.1):
             
         
         w -= - step * correction_vector
+        if visualize:
+            update_diagram(diagram)
+            
+            
+def update_diagram(diagram):
+    diagram.canvas.delete("all") #TODO: implement
+    #diagram.scatter_plot(args[0])
 
 
 
