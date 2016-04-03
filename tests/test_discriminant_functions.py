@@ -6,7 +6,8 @@ import unittest
 import numpy as np
 from utility import diagrams
 from random import randint
-import linear_discriminant_functions.discriminant_functions_algorithms as dscrnt
+import data_instance as dscrnt
+import discriminant_functions_algorithms as dfa
 
 class test_discriminant_functions(unittest.TestCase):
     
@@ -19,17 +20,18 @@ class test_discriminant_functions(unittest.TestCase):
         
         
         #builds the dataset
-        data_instances = [dscrnt.DataInstance(np.array([randint(0,100),randint(0,100)]), "") for i in range(0,100)]
+        data_instances = [dscrnt.DataInstance(np.array([randint(0,100),1]), "", randint(0,100)) for i in range(0,100)]
+                
         #sets up the classes based on the linear function y = 2x + 35
         for data_instance in data_instances:
-            if data_instance.feature_vector[-1] > (2*data_instance.feature_vector[0] + 35):
+            if data_instance.output > (2*data_instance.feature_vector[0] + 35):
                 data_instance.instance_class = "A"
             else:
                 data_instance.instance_class = "B"
         self.data_instances = data_instances
         
-        d = diagrams.Diagram()
-        d.scatter_plot(data_instances)
+        #d = diagrams.Diagram()
+        #d.scatter_plot(data_instances)
         
         '''
         x_axis = [randint(0,100) for i in range(100)]
@@ -49,7 +51,7 @@ class test_discriminant_functions(unittest.TestCase):
 
 
     def test_perceptron_training_algorithm(self):
-        dscrnt.perceptron_training_algorithm(self.data_instances)
+        dfa.perceptron_training_algorithm(self.data_instances)
         
 
 

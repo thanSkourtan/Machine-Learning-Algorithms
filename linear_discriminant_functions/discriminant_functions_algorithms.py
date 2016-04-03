@@ -6,7 +6,7 @@ Recognition and Machine Learning By Bishop'
 """
 import numpy as np
 from random import uniform
-from linear_discriminant_functions.data_instance import DataInstance
+
 
 
 def perceptron_training_algorithm(data_instances, step = 0.1):
@@ -17,14 +17,26 @@ def perceptron_training_algorithm(data_instances, step = 0.1):
 
     #take a random weight vector
     decision_boundary_dimensions = len(data_instances[0].feature_vector) - 1
-    
     w = np.array([uniform(1,100) for i in range(decision_boundary_dimensions + 1)])
     
-    #find the misclassified instances
-    misclassified_data = []
-    for data_instance in data_instances:
-        if  data_instance.feature_vector[-1] > np.dot(data_instance.feature_vector, np.transpose(w)) and data_instance.instance_class =='B':
-            misclassified_data.append()
+    while(True):
+        #find the misclassified instances
+        misclassified_data = []
+        for data_instance in data_instances:
+            if  (data_instance.output <= np.dot(data_instance.feature_vector, np.transpose(w)) and data_instance.instance_class =='A') or \
+            (data_instance.output > np.dot(data_instance.feature_vector, np.transpose(w)) and data_instance.instance_class =='B') :
+                misclassified_data.append(data_instance)
+                
+        if misclassified_data is None:
+            break
+        
+        correction_vector = np.array([0, 0])
+        
+        for misclassified_feature in misclassified_data:
+            correction_vector +=  (1 if misclassified_feature.instance_class == 'A' else -1) * misclassified_feature.feature_vector
+            
+        
+        w -= - step * correction_vector
 
 
 

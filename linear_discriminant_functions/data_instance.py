@@ -13,6 +13,7 @@ class DataInstance():
         point_class(string): the name of class the instance of the corresponding point belongs to.
          
     """
-    def __init__(self, feature_vector, instance_class):
+    def __init__(self, feature_vector, instance_class, output):
         self.feature_vector = feature_vector                   
         self.instance_class = instance_class
+        self.output = output
