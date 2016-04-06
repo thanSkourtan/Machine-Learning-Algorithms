@@ -16,9 +16,6 @@ class test_discriminant_functions(unittest.TestCase):
         self.data_instances = data_instances
 
     def setUp(self):
-        
-        
-        
         #builds the dataset
         data_instances = [dscrnt.DataInstance(np.array([randint(0,100),1]), "", randint(0,100)) for i in range(0,100)]
                 
@@ -30,8 +27,8 @@ class test_discriminant_functions(unittest.TestCase):
                 data_instance.instance_class = "B"
         self.data_instances = data_instances
         
-        #d = diagrams.Diagram()
-        #d.scatter_plot(data_instances)
+        d = diagrams.Diagram()
+        d.scatter_plot(data_instances)
         
         '''
         x_axis = [randint(0,100) for i in range(100)]
