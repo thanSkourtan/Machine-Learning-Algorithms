@@ -16,7 +16,7 @@ class DiagramsTest(unittest.TestCase):
         self.y_axis = [(2*x+35) for x in self.x_axis]
         
         #builds the data_instances
-        self.data_instances = [dscrnt.DataInstance(np.array([randint(0,100),randint(0,100)]), "", randint(0, 100)) for i in range(0,100)]
+        self.data_instances = [dscrnt.DataInstance(np.array([randint(0,100),randint(0,100)]), "", randint(0, 100)) for i in range(0,15)]
         #sets up the classes based on the linear function y = 2x + 35
         for data_instance in self.data_instances:
             if data_instance.feature_vector[-1] > (2*data_instance.feature_vector[0] + 35):
@@ -36,7 +36,9 @@ class DiagramsTest(unittest.TestCase):
         d = diagrams.Diagram()
         d.scatter_plot(self.data_instances)
         
-        
+    def test_complete_graph_plot(self):
+        d = diagrams.Diagram()
+        d.complete_graph_plot(self.data_instances)
         
         
     def test_line_graph(self):

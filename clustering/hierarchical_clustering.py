@@ -6,9 +6,9 @@ from sys import float_info
 from copy import copy
 from distance_metrics import euclidean_distance
 from utility.general import standard_deviation, mean, pick_up_column
+from clustering.data_instance import DataInstance
 
-
-class Cluster():
+class Cluster(DataInstance):
     """Class(Structure) that represents a cluster.
     
     Attributes:
@@ -23,8 +23,8 @@ class Cluster():
             is used only when building the dendrogram.
     
     """
-    def __init__(self, features = None, left=None, right=None, distance=0.0, idn=None, label=None, left_top_corner_x_coordinate=None):
-        self.feature_vector = features 
+    def __init__(self, feature_vector = None, left=None, right=None, distance=0.0, idn=None, label=None, left_top_corner_x_coordinate=None): 
+        DataInstance.__init__(self, feature_vector)
         self.left = left
         self.right = right
         self.distance = distance

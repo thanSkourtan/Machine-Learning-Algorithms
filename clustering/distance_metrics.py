@@ -22,40 +22,40 @@ from math import sqrt
 from utility.general import standard_deviation,pick_up_all_data_columns 
 
 
-def jaccard_index(cluster1, cluster2):
+def jaccard_index(data_instance1, data_instance2):
     """Non-euclidean distance calculator, used for categorical data. Data concern presence - absence so their values are either 0 or 1."""
-    if len(cluster1.feature_vector) != len(cluster2.feature_vector):
+    if len(data_instance1.feature_vector) != len(data_instance2.feature_vector):
         print("The two points must be defined in the same dimensional space")
         return
     
     nominator = 0.0
     denominator = 0.0
-    for i in range(0, len(cluster1.feature_vector)):
-        if cluster1.feature_vector[i]==1 and cluster2.feature_vector[i]==1:
+    for i in range(0, len(data_instance1.feature_vector)):
+        if data_instance1.feature_vector[i]==1 and data_instance2.feature_vector[i]==1:
             nominator += 1
             denominator += 1
-        elif cluster1.feature_vector[i] != cluster2.feature_vector[i]:
+        elif data_instance1.feature_vector[i] != data_instance2.feature_vector[i]:
             denominator += 1
     return 1 - nominator/denominator
 
 
-def euclidean_distance(cluster1, cluster2):
+def euclidean_distance(data_instance1, data_instance2):
     """Calculates the euclidean distance of two clusters in the n-dimensional space, which is defined by the number of their attributes."""
-    if len(cluster1.feature_vector) != len(cluster2.feature_vector):
+    if len(data_instance1.feature_vector) != len(data_instance2.feature_vector):
         print("The two points must be defined in the same dimensional space.")
         return
     
     sum_of_squares = 0.0
-    for i in range(0, len(cluster1.feature_vector)):
-        sum_of_squares += pow(cluster1.feature_vector[i] - cluster2.feature_vector[i], 2)
+    for i in range(0, len(data_instance1.feature_vector)):
+        sum_of_squares += pow(data_instance1.feature_vector[i] - data_instance2.feature_vector[i], 2)
     return sqrt(sum_of_squares)
 
 
-def standardised_euclidean_distance(data,cluster1, cluster2):
+def standardised_euclidean_distance(data,data_instance1, data_instance2):
     """Returns the euclidean distance of two clusters in the n-dimensional space, which is defined by the number of their attributes, 
        weighted by the inverse of the corresponding attribute's variance.
     """
-    if len(cluster1.feature_vector) != len(cluster2.feature_vector):
+    if len(data_instance1.feature_vector) != len(data_instance2.feature_vector):
         print("The two points must be defined in the same dimensional space.")
         return
     
@@ -67,15 +67,15 @@ def standardised_euclidean_distance(data,cluster1, cluster2):
             std_list.append(standard_deviation(column))
     
     sum_of_squares = 0.0
-    for i in range(0, len(cluster1.feature_vector)):
-        sum_of_squares += 1/pow(std_list[i],2) * pow(cluster1.feature_vector[i] - cluster2.feature_vector[i], 2) #the weight here is the variance not the std
+    for i in range(0, len(data_instance1.feature_vector)):
+        sum_of_squares += 1/pow(std_list[i],2) * pow(data_instance1.feature_vector[i] - data_instance2.feature_vector[i], 2) #the weight here is the variance not the std
     return sqrt(sum_of_squares)
 
 
-def chi_square_distance(data, cluster1, cluster2):
+def chi_square_distance(data, data_instance1, data_instance2):
     """This distance metric is used only for categorical data."""
     
-    if len(cluster1.feature_vector) != len(cluster2.feature_vector):
+    if len(data_instance1.feature_vector) != len(data_instance2.feature_vector):
         print("The two points must be defined in the same dimensional space.")
         return
     
@@ -95,11 +95,11 @@ def chi_square_distance(data, cluster1, cluster2):
     
     cluster1_list = []
     cluster2_list = []
-    for feature in cluster1.feature_vector:
-        cluster1_list.append(feature/sum(cluster1.feature_vector))
+    for feature in data_instance1.feature_vector:
+        cluster1_list.append(feature/sum(data_instance1.feature_vector))
         
-    for feature in cluster2.feature_vector:
-        cluster2_list.append(feature/sum(cluster2.feature_vector))
+    for feature in data_instance1.feature_vector:
+        cluster2_list.append(feature/sum(data_instance2.feature_vector))
     
     sum_of_squares = 0.0
     for i in range(0, len(cluster1_list)):

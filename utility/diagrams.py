@@ -9,7 +9,7 @@ __print_cluster
 """
 #from PIL import Image, ImageDraw
 from tkinter import *
-
+import clustering.data_instance as din
 
 
 
@@ -66,26 +66,10 @@ class Diagram():
         self.draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.horizontal_margins/2, self.vertical_margins/2), fill=(0, 0, 0))
         """
         
-
         
-    
-    def scatter_plot(self, *args, r = 2):        
-        """Plots the points indicated by the coordinates x, y, passed as parameters."""
-        self.root.wm_title("scatter plot")
-        argument_types = tuple(arg.__class__ for arg in args)
-        typemap = {(list, list):self.scatter_plot_axis, (list,) : self.scatter_plot_data_instances}
         
-        if argument_types in typemap:
-            return typemap[argument_types](*args)
-        else:
-            print("Input a list of data instances or two lists with the x, y values")
-        
-    def scatter_plot_axis(self, x_axis = [], y_axis =[],  r = 2):
-        
-        if len(x_axis) != len(y_axis):
-            print("The x_axis length must be equal to the y_axis length")
-            return
-                
+    def __plot_the_points(self, x_axis, y_axis, r):
+        #TODO: stop the repetition
         largest_x = max(x_axis)
         largest_y = max(y_axis)
         
@@ -96,8 +80,38 @@ class Diagram():
         for i in range(len(x_axis)):
             #self.draw.ellipse(( point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r),fill=(255,0,0))
             self.canvas.create_oval(point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r, outline= "red", fill = "red")
+    
+    def __plot_the_lines(self, x_axis, y_axis, r):
+        largest_x = max(x_axis)
+        largest_y = max(y_axis)
         
+        #uses the rule of three 
+        point_height = lambda y : self.vertical_margins/2 + (self.height - self.vertical_margins) * (1 - y/largest_y)  #because y-axis is reversed
+        point_width = lambda x :  self.horizontal_margins/2 + (self.width * x/largest_x) # because the largest x will have width equal to width - hor_margins/2
         
+        for i in range(0, len(x_axis)):
+            for j in range(i + 1, len(x_axis)):
+                self.canvas.create_line((point_width(x_axis[i]), point_height(y_axis[i]), point_width(x_axis[j]), point_height(y_axis[j])), fill = "blue")
+    
+    def scatter_plot(self, *args, r = 2):        
+        """Plots the points indicated by the coordinates x, y, passed as parameters."""
+        
+        argument_types = tuple(arg.__class__ for arg in args)
+        typemap = {(list, list):self.__scatter_plot_axis, (list,) : self.__scatter_plot_data_instances}
+        
+        if argument_types in typemap:
+            return typemap[argument_types](*args)
+        else:
+            print("Input a list of data instances or two lists with the x, y values")
+        
+    def __scatter_plot_axis(self, x_axis = [], y_axis =[],  r = 2):
+        
+        if len(x_axis) != len(y_axis):
+            print("The x_axis length must be equal to the y_axis length")
+            return
+        self.__plot_the_points(x_axis, y_axis, r)
+        self.root.wm_title("scatter plot")
+        self.root.mainloop()
         
         ################################################ lines for TSP
         '''x_first = -1
@@ -123,29 +137,22 @@ class Diagram():
             draw.text((self.horizontal_margins/2 - 30, - cluster_height(cluster.distance) - self.vertical_margins/2 + self.height), 
                       str(round(cluster.distance, 2)), fill=(255, 0, 0))
         '''
-        #TODO: not working properly
-        if self.root.state() == 'normal':
-            self.root.mainloop()
-            
-        else:
-            self.canvas.delete("all")
-            self.root.update()
-            
-            
-        #self.image.show()
-        
     
-    def scatter_plot_data_instances(self, data_instances, r = 2):
+    def __scatter_plot_data_instances(self, data_instances, r = 2):
         """Plots data instances"""
         
-        for data_instance in data_instances:
-            if data_instance.feature_vector.size != 2:
-                print("The data should have only 2 features.")
-                return
-        x_axis = [data_instance.feature_vector[0] for data_instance in data_instances]
-        y_axis = [data_instance.feature_vector[1] for data_instance in data_instances]
-        self.scatter_plot_axis(x_axis, y_axis)
+        x_axis, y_axis = din.data_instances_to_lists(data_instances)
+        self.__plot_the_points(x_axis, y_axis, r)
+        self.root.wm_title("scatter plot") 
+        self.root.mainloop()
+
         
+    def complete_graph_plot(self, data_instances, r = 5):
+        x_axis, y_axis = din.data_instances_to_lists(data_instances)
+        self.__plot_the_points(x_axis, y_axis, r)
+        self.__plot_the_lines(x_axis, y_axis, r)
+        self.root.wm_title("graph")
+        self.root.mainloop()
         
         
     def root_size_change_handler(self, event):
