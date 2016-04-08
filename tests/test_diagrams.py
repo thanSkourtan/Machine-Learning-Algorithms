@@ -7,6 +7,7 @@ from random import randint
 from utility import diagrams
 import data_instance as dscrnt
 import numpy as np
+from clustering.graph_theory import *
 
 class DiagramsTest(unittest.TestCase):
     
@@ -24,7 +25,8 @@ class DiagramsTest(unittest.TestCase):
             else:
                 data_instance.instance_class = "B"
         self.data_instances = self.data_instances
-    
+        
+        self.data = [Node(np.array([randint(0,100), randint(0,100)]), i) for i in range(0,7)]  
     
     
     def test_scatter_plotA(self):
@@ -45,9 +47,22 @@ class DiagramsTest(unittest.TestCase):
         pass
         #d = diagrams.Diagram()
         #d.line_graph(self.x_axis, self.y_axis)
+        
+    def test_plot_mst_graph(self):
+        complete_graph = construct_complete_graph(self.data)
+        mst = prim_mst(self.data, complete_graph)
+        
+        d = diagrams.Diagram()
+        d.plot_mst_graph(mst)
 
 
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
-    unittest.main()
+    #unittest.main()
+    
+    
+    suite = unittest.TestSuite()
+    suite.addTest(DiagramsTest("test_plot_mst_graph"))
+    runner = unittest.TextTestRunner()
+    runner.run(suite)

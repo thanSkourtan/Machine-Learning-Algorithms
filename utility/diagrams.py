@@ -12,9 +12,6 @@ from tkinter import *
 import clustering.data_instance as din
 
 
-
-
-
 class Diagram():
     
     def __init__(self,horizontal_margins=100, height=700, vertical_margins=100, width = 1000, cluster_width = 22):
@@ -66,32 +63,35 @@ class Diagram():
         self.draw.line((self.horizontal_margins/2, self.height - self.vertical_margins/2, self.horizontal_margins/2, self.vertical_margins/2), fill=(0, 0, 0))
         """
         
-        
-        
+    
+    def point_relative_dimensions(self, x, y, largest_x, largest_y):
+        #uses the rule of three
+        x_relative = self.horizontal_margins/2 + (self.width * x/largest_x) # because the largest x will have width equal to width - hor_margins/2
+        y_relative = self.vertical_margins/2 + (self.height - self.vertical_margins) * (1 - y/largest_y)  #because y-axis is reversed
+        return x_relative, y_relative
+
+    
     def __plot_the_points(self, x_axis, y_axis, r):
-        #TODO: stop the repetition
         largest_x = max(x_axis)
         largest_y = max(y_axis)
-        
-        #uses the rule of three 
-        point_height = lambda y : self.vertical_margins/2 + (self.height - self.vertical_margins) * (1 - y/largest_y)  #because y-axis is reversed
-        point_width = lambda x :  self.horizontal_margins/2 + (self.width * x/largest_x) # because the largest x will have width equal to width - hor_margins/2
         
         for i in range(len(x_axis)):
             #self.draw.ellipse(( point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r),fill=(255,0,0))
-            self.canvas.create_oval(point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r, outline= "red", fill = "red")
+            x,y = self.point_relative_dimensions(x_axis[i], y_axis[i], largest_x, largest_y) 
+            self.canvas.create_oval(x - r, y - r, x + r, y + r, outline= "red", fill = "red") 
     
-    def __plot_the_lines(self, x_axis, y_axis, r):
+    def __plot_the_lines(self, x_axis, y_axis):
         largest_x = max(x_axis)
         largest_y = max(y_axis)
         
-        #uses the rule of three 
-        point_height = lambda y : self.vertical_margins/2 + (self.height - self.vertical_margins) * (1 - y/largest_y)  #because y-axis is reversed
-        point_width = lambda x :  self.horizontal_margins/2 + (self.width * x/largest_x) # because the largest x will have width equal to width - hor_margins/2
-        
         for i in range(0, len(x_axis)):
             for j in range(i + 1, len(x_axis)):
-                self.canvas.create_line((point_width(x_axis[i]), point_height(y_axis[i]), point_width(x_axis[j]), point_height(y_axis[j])), fill = "blue")
+                self.canvas.create_line((self.point_relative_dimensions(x_axis[i], y_axis[i], largest_x, largest_y), self.point_relative_dimensions(x_axis[j], y_axis[j], largest_x, largest_y)), fill = "blue")
+        """
+        for i in range(0, len(x_axis)-1):
+            self.canvas.create_line((point_width(x_axis[i]), point_height(y_axis[i]), point_width(x_axis[i+1]), point_height(y_axis[i+1])), fill = "blue")
+        """
+    
     
     def scatter_plot(self, *args, r = 2):        
         """Plots the points indicated by the coordinates x, y, passed as parameters."""
@@ -150,7 +150,7 @@ class Diagram():
     def complete_graph_plot(self, data_instances, r = 5):
         x_axis, y_axis = din.data_instances_to_lists(data_instances)
         self.__plot_the_points(x_axis, y_axis, r)
-        self.__plot_the_lines(x_axis, y_axis, r)
+        self.__plot_the_lines(x_axis, y_axis)
         self.root.wm_title("graph")
         self.root.mainloop()
         
@@ -161,6 +161,25 @@ class Diagram():
         if self.root.winfo_width() != self.canvas.winfo_width():
             self.frame.config(width = self.root.winfo_width())
             self.frame.config(height = self.root.winfo_height())
+    
+    def plot_mst_graph(self, mst, r = 2):
+        x_axis, y_axis = din.data_instances_to_lists(mst)
+        self.__plot_the_points(x_axis, y_axis, r)
+        largest_x = max(x_axis)
+        largest_y = max(y_axis)
+        
+        for node in mst:
+            if node.parent is not None: 
+                self.canvas.create_line(self.point_relative_dimensions(node.feature_vector[0], node.feature_vector[1], largest_x, largest_y), 
+                                        self.point_relative_dimensions(node.parent.feature_vector[0], node.parent.feature_vector[1], 
+                                        largest_x, largest_y), fill = "blue")
+                #TODO: currently just for debugging reasons
+                self.canvas.create_text(self.point_relative_dimensions(node.feature_vector[0], node.feature_vector[1]-2, largest_x, largest_y), 
+                                        text = str(node.id), fill= "red")
+        
+        
+        self.root.mainloop()
+                
 
 
     def print_dendrogram(self, cluster_list, instances_num):
