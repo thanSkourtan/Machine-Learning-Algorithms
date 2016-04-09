@@ -71,49 +71,57 @@ class Diagram():
         return x_relative, y_relative
 
     
-    def __plot_the_points(self, x_axis, y_axis, r):
+    def __plot_the_points(self, x_axis, y_axis, r, outline_color, fill_color):
         largest_x = max(x_axis)
         largest_y = max(y_axis)
         
         for i in range(len(x_axis)):
             #self.draw.ellipse(( point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r),fill=(255,0,0))
             x,y = self.point_relative_dimensions(x_axis[i], y_axis[i], largest_x, largest_y) 
-            self.canvas.create_oval(x - r, y - r, x + r, y + r, outline= "red", fill = "red") 
+            self.canvas.create_oval(x - r, y - r, x + r, y + r, outline = outline_color, fill = fill_color) 
     
-    def __plot_the_lines(self, x_axis, y_axis):
+    def __plot_the_lines(self, x_axis, y_axis, line_colour):
         largest_x = max(x_axis)
         largest_y = max(y_axis)
         
         for i in range(0, len(x_axis)):
             for j in range(i + 1, len(x_axis)):
-                self.canvas.create_line((self.point_relative_dimensions(x_axis[i], y_axis[i], largest_x, largest_y), self.point_relative_dimensions(x_axis[j], y_axis[j], largest_x, largest_y)), fill = "blue")
+                self.canvas.create_line((self.point_relative_dimensions(x_axis[i], y_axis[i], largest_x, largest_y), self.point_relative_dimensions(x_axis[j], y_axis[j], largest_x, largest_y)), fill = line_colour)
         """
         for i in range(0, len(x_axis)-1):
             self.canvas.create_line((point_width(x_axis[i]), point_height(y_axis[i]), point_width(x_axis[i+1]), point_height(y_axis[i+1])), fill = "blue")
         """
     
     
-    def scatter_plot(self, *args, r = 2):        
+    def scatter_plot(self, *args, r = 2, outline_color = "red", fill_color = "red" ):        
         """Plots the points indicated by the coordinates x, y, passed as parameters."""
         
         argument_types = tuple(arg.__class__ for arg in args)
         typemap = {(list, list):self.__scatter_plot_axis, (list,) : self.__scatter_plot_data_instances}
         
         if argument_types in typemap:
-            return typemap[argument_types](*args)
+            return typemap[argument_types](*args, r= r, outline_color = outline_color, fill_color = fill_color)
         else:
             print("Input a list of data instances or two lists with the x, y values")
         
-    def __scatter_plot_axis(self, x_axis = [], y_axis =[],  r = 2):
+    def __scatter_plot_data_instances(self, data_instances, r = 2, outline_color = "red", fill_color = "red"):
+        """Plots data instances"""
+        
+        x_axis, y_axis = din.data_instances_to_lists(data_instances)
+        self.__plot_the_points(x_axis, y_axis, r, outline_color, fill_color)
+        self.root.wm_title("scatter plot") 
+        #self.root.mainloop()
+    
+    def __scatter_plot_axis(self, x_axis = [], y_axis =[],  r = 2, outline_color = "red", fill_color = "red"):
         
         if len(x_axis) != len(y_axis):
             print("The x_axis length must be equal to the y_axis length")
             return
-        self.__plot_the_points(x_axis, y_axis, r)
+        self.__plot_the_points(x_axis, y_axis, r, outline_color, fill_color)
         self.root.wm_title("scatter plot")
-        self.root.mainloop()
+        #self.root.mainloop()
         
-        ################################################ lines for TSP
+################################################################################### lines for TSP
         '''x_first = -1
         y_first = -1
         for i in range(len(x_axis)):
@@ -137,22 +145,17 @@ class Diagram():
             draw.text((self.horizontal_margins/2 - 30, - cluster_height(cluster.distance) - self.vertical_margins/2 + self.height), 
                       str(round(cluster.distance, 2)), fill=(255, 0, 0))
         '''
+################################################################################### lines for TSP
     
-    def __scatter_plot_data_instances(self, data_instances, r = 2):
-        """Plots data instances"""
-        
-        x_axis, y_axis = din.data_instances_to_lists(data_instances)
-        self.__plot_the_points(x_axis, y_axis, r)
-        self.root.wm_title("scatter plot") 
+    def show_diagram(self):
         self.root.mainloop()
-
-        
-    def complete_graph_plot(self, data_instances, r = 5):
+    
+    def complete_graph_plot(self, data_instances, r = 5, outline_color = "red", fill_color ="red", line_colour = "blue"):
         x_axis, y_axis = din.data_instances_to_lists(data_instances)
-        self.__plot_the_points(x_axis, y_axis, r)
-        self.__plot_the_lines(x_axis, y_axis)
+        self.__plot_the_points(x_axis, y_axis, r, outline_color, fill_color)
+        self.__plot_the_lines(x_axis, y_axis, line_colour)
         self.root.wm_title("graph")
-        self.root.mainloop()
+        
         
         
     def root_size_change_handler(self, event):
@@ -162,9 +165,9 @@ class Diagram():
             self.frame.config(width = self.root.winfo_width())
             self.frame.config(height = self.root.winfo_height())
     
-    def plot_mst_graph(self, mst, r = 2):
+    def plot_mst_graph(self, mst, r = 2, outline_color = "red", fill_color = "red", line_colour = "blue"):
         x_axis, y_axis = din.data_instances_to_lists(mst)
-        self.__plot_the_points(x_axis, y_axis, r)
+        self.__plot_the_points(x_axis, y_axis, r, outline_color, fill_color)
         largest_x = max(x_axis)
         largest_y = max(y_axis)
         
@@ -172,12 +175,10 @@ class Diagram():
             if node.parent is not None: 
                 self.canvas.create_line(self.point_relative_dimensions(node.feature_vector[0], node.feature_vector[1], largest_x, largest_y), 
                                         self.point_relative_dimensions(node.parent.feature_vector[0], node.parent.feature_vector[1], 
-                                        largest_x, largest_y), fill = "blue")
+                                        largest_x, largest_y), fill = line_colour)
                 #TODO: currently just for debugging reasons
                 self.canvas.create_text(self.point_relative_dimensions(node.feature_vector[0], node.feature_vector[1]-2, largest_x, largest_y), 
-                                        text = str(node.id), fill= "red")
-        
-        
+                                        text = str(node.id), fill= "red")    
         self.root.mainloop()
                 
 

@@ -21,7 +21,7 @@ class Node(DataInstance):
     def __init__(self, feature_vector, id):
         DataInstance.__init__(self, feature_vector)
         self.id = id
-        self.min_edge_weight = max_integer
+        self.min_edge_weight = max_integer #Important: this is the distance from a node's parent
         self.parent = None
         self.inconsistence = False
         self.mean = 0.0
@@ -52,17 +52,23 @@ def prim_mst(data, complete_graph):
     data[0].min_edge_weight = 0
     
     heap = []
-    for node in data:
-        heappush(heap, node)
-        
+    
+    """NOTE: not putting all together in the heap due to reordering issues, same as in java."""
+    """for node in data:
+        heappush(heap, node)"""
+    
+    visited = [0] * len(data) 
+    heappush(heap, data[0])
+    
     while heap:        
         current_node = heappop(heap)
-               
-        for node in heap: #all nodes in heap are adjacent nodes, this would be wrong otherwise
-            if complete_graph[current_node.id][node.id] < node.min_edge_weight:
+        visited[current_node.id] = 1
+        for node in data: #all nodes in heap are adjacent nodes, this would be wrong otherwise
+            if visited[node.id] == 0:
+                if complete_graph[current_node.id][node.id] < node.min_edge_weight:
                     node.min_edge_weight = complete_graph[current_node.id][node.id]
                     node.parent = current_node
-    
+                    heappush(heap, node)
         
     return data #undercover MST
     
@@ -129,16 +135,32 @@ def cluster_divisioning(adjacency_list):
             node.cluster_id = cluster_id
             __dfs(node, adjacency_list, visited, cluster_id)
             cluster_id += 1
+            
+    """debug code"""
+    for node in adjacency_list.keys():
+        print("node id: ", node.id, " - ", node.cluster_id)
+    
     return adjacency_list
     
     
 def __dfs(node, adjacency_list, visited, cluster_id):
     
     for adj_node in adjacency_list[node]:
-        if visited[adj_node.id] == 0 and (adj_node.inconsistence == False or (adj_node.inconsistence == True and adj_node.parent is not node)):
-            visited[adj_node.id] = 1
-            adj_node.cluster_id = cluster_id
-            __dfs(adj_node, adjacency_list, visited, cluster_id)
+        if visited[adj_node.id] == 0:
+            '''I MUST know whether i am going from parent to child or from child to parent(WHO is the parent among the two) so 
+               as to always use the proper parent's inconsistent property.
+            '''
+            #determine which node is the parent
+            child_of_the_two = None
+            if node.parent is adj_node:
+                child_of_the_two = node
+            else:
+                child_of_the_two = adj_node
+                
+            if child_of_the_two.inconsistence == False:
+                visited[adj_node.id] = 1
+                adj_node.cluster_id = cluster_id
+                __dfs(adj_node, adjacency_list, visited, cluster_id)
     
     
     
