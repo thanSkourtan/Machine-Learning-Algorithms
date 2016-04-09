@@ -26,7 +26,7 @@ class Node(DataInstance):
         self.inconsistence = False
         self.mean = 0.0
         self.standard_deviation = 0.0 
-        self.cluster = None
+        self.cluster_id = -1
     
     
     def __lt__(self, other):
@@ -97,33 +97,51 @@ def inconsistent_edges(mst, k, q):
             used = used | temp
             all_neighbour_nodes = all_neighbour_nodes | temp
             counter -= 1
-            
-        print("the neighbours for ", edge.id, " are", end =" ")
         
-        '''debug code'''
+        
+        '''debug code'''    
+        print("the neighbours for ", edge.id, " are", end =" ")
         for lala in all_neighbour_nodes:
             print(lala.id, end = ",")
         print()
         
+        
+        #######################
         weights_list = [node.min_edge_weight for node in all_neighbour_nodes]
         edge.mean = mean(weights_list)
         edge.standard_deviation = standard_deviation(weights_list)
         if (edge.min_edge_weight > (q * edge.standard_deviation + edge.mean)):
             edge.inconsistence = True
-            
+        
+        '''debug code'''
+    for node in mst:
+        print("the node with id ", node.id, "has  inconsistence", node.inconsistence) 
     
-       
-"""
-    for second_edge in other_edges:
-        if second_edge is the most k steps from edge:
-            list _of_edge. append(second_edge)
+    return adjacency_list
     
-    mean(twn weigths tis parapanw listas)
-    std(twn weigths tis parapanw listas )
+def cluster_divisioning(adjacency_list):
+    cluster_id = 0
+    visited = [0] * len(adjacency_list) 
     
-    if (edge.min_edge_weight > q * std)
+    for node in adjacency_list:
+        if visited[node.id] == 0:
+            visited[node.id] = 1
+            node.cluster_id = cluster_id
+            __dfs(node, adjacency_list, visited, cluster_id)
+            cluster_id += 1
+    return adjacency_list
     
-"""
+    
+def __dfs(node, adjacency_list, visited, cluster_id):
+    
+    for adj_node in adjacency_list[node]:
+        if visited[adj_node.id] == 0 and (adj_node.inconsistence == False or (adj_node.inconsistence == True and adj_node.parent is not node)):
+            visited[adj_node.id] = 1
+            adj_node.cluster_id = cluster_id
+            __dfs(adj_node, adjacency_list, visited, cluster_id)
+    
+    
+    
 
 
 
