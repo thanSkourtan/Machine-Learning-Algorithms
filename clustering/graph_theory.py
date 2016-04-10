@@ -39,6 +39,7 @@ def mst(data):
     
     
 def construct_complete_graph(data):
+    print("lala")
     """Gets a list of data_instances and returns a graph represented by a two dimensional numpy array"""
     #data is a list of data_instances
     complete_graph = np.zeros((len(data),len(data)))
@@ -48,6 +49,7 @@ def construct_complete_graph(data):
     return complete_graph
 
 def prim_mst(data, complete_graph):
+    print("lala")
     """We only need to initialize the min_edge_weight and the parent attribute in data list and there's our MST!"""
     data[0].min_edge_weight = 0
     
@@ -74,7 +76,7 @@ def prim_mst(data, complete_graph):
     
 
 def inconsistent_edges(mst, k, q):    
-    
+    print("lala")
     """We are  building the mst in the form of an adjacency list, which will provide a better way to find the adjacent edges in the 
        inconsistent_edges algorithm
     """
@@ -128,7 +130,7 @@ def inconsistent_edges(mst, k, q):
 def cluster_divisioning(adjacency_list):
     cluster_id = 0
     visited = [0] * len(adjacency_list) 
-    
+    print("lalo")
     for node in adjacency_list:
         if visited[node.id] == 0:
             visited[node.id] = 1
@@ -140,7 +142,7 @@ def cluster_divisioning(adjacency_list):
     for node in adjacency_list.keys():
         print("node id: ", node.id, " - ", node.cluster_id)
     
-    return adjacency_list
+    return adjacency_list, cluster_id
     
     
 def __dfs(node, adjacency_list, visited, cluster_id):

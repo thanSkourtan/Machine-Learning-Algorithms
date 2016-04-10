@@ -7,11 +7,19 @@ from random import randint
 from clustering.graph_theory import *
 from utility import diagrams
 import numpy as np
+from clustering.tests.data_producer import *
+
+
+color_list = ["red", "green", "orange", "blue4", "cyan2", "SeaGreen1", "green4", "khaki2",
+              "yellow2", "DarkGoldenrod4", "pink4", "brown4", "maroon4", "gray4", "magenta4"]
+
+
 
 class MST(unittest.TestCase):
     
     def setUp(self):
         self.data = [Node(np.array([randint(0,100), randint(0,100)]), i) for i in range(0,10)]   
+        self.data =[Node(np.array([randint(0,100), randint(0,100)]), i) for i in range(0,10)] 
         #d = diagrams.Diagram()
         #d.scatter_plot(self.data)
         
@@ -24,7 +32,7 @@ class MST(unittest.TestCase):
      
     def test_prim_mst(self):
         d = diagrams.Diagram()
-        #d.complete_graph_plot(self.data)
+        d.complete_graph_plot(self.data)
         
         
         graph = construct_complete_graph(self.data)
@@ -45,28 +53,35 @@ class MST(unittest.TestCase):
     
     
     def test_cluster_divisioning(self):
-        complete_graph = construct_complete_graph(self.data)
-        mst = prim_mst(self.data, complete_graph)
-        d = diagrams.Diagram()
-        d.plot_mst_graph(mst)
+        data = four_corners_data(100)
+        complete_graph = construct_complete_graph(data)
+        mst = prim_mst(data, complete_graph)
+        #d = diagrams.Diagram()
+        #d.plot_mst_graph(mst)
+        
+        #na dw mipws apo dw kai katw epireazontai oi times twn diagrammatwn
         mst_with_inconsistency = inconsistent_edges(mst, 3, 2)
-        graph_divided_in_clusters = cluster_divisioning(mst_with_inconsistency)
+        
+        ##############debug code#############
+        l = diagrams.Diagram()
+        l.plot_mst_graph(mst)
+        
+        graph_divided_in_clusters, no_of_clusters = cluster_divisioning(mst_with_inconsistency)
         d1 = diagrams.Diagram()
         
-        lala = graph_divided_in_clusters.keys()
-        cluster_ids = set()
+                 
+        cluster_data_list = [[] for i in range(0,no_of_clusters)]
         
-        for node in lala:
-            cluster_ids.add(node.cluster_id)            
-        cluster_data_list = [[] * len(cluster_ids)]
-        '''
         for node in graph_divided_in_clusters:
             cluster_data_list[node.cluster_id].append(node)
         
-        d1.scatter_plot(cluster_data_list[0], r = 3, outline_color = "red", fill_color = "red")
-        d1.scatter_plot(cluster_data_list[1], r = 3, outline_color = "blue", fill_color = "blue")
+        for i, cluster_list in enumerate(cluster_data_list):
+            d1.scatter_plot(cluster_list, r = 2, outline_color = color_list[i % 15], fill_color = color_list[i % 15])
+        
         d1.show_diagram()
-        '''
+        
+
+        
         
     
     
@@ -75,7 +90,7 @@ if __name__ == "__main__":
     
     
     newSuite = unittest.TestSuite()
-    newSuite.addTest(MST("test_prim_mst"))
+    newSuite.addTest(MST("test_cluster_divisioning"))
     
     
     runner = unittest.TextTestRunner()

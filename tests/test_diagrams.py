@@ -5,7 +5,7 @@
 import unittest
 from random import randint
 from utility import diagrams
-import data_instance as dscrnt
+import linear_discriminant_functions.data_instance as dscrnt
 import numpy as np
 from clustering.graph_theory import *
 
@@ -54,7 +54,16 @@ class DiagramsTest(unittest.TestCase):
         
         d = diagrams.Diagram()
         d.plot_mst_graph(mst)
-
+        
+        
+    def test_double_data_instance_addition_in_scatterplot(self):
+        d = diagrams.Diagram()
+        data_instance1 = [dscrnt.DataInstance(np.array([100,150]), "", randint(1,10))]
+        d.scatter_plot(data_instance1, outline_color = "red", fill_color = "red")
+        data_instance2 = [dscrnt.DataInstance(np.array([100,100]), "", randint(1,10))]
+        d.scatter_plot(data_instance2, outline_color ="blue", fill_color = "blue")
+        d.show_diagram()
+        
 
 
 if __name__ == "__main__":
@@ -63,6 +72,6 @@ if __name__ == "__main__":
     
     
     suite = unittest.TestSuite()
-    suite.addTest(DiagramsTest("test_plot_mst_graph"))
+    suite.addTest(DiagramsTest("test_double_data_instance_addition_in_scatterplot"))
     runner = unittest.TextTestRunner()
     runner.run(suite)

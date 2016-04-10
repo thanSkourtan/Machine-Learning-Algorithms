@@ -27,6 +27,9 @@ class Diagram():
         self.vertical_margins = vertical_margins
         self.width = width
         self.cluster_width = cluster_width
+        self.points_identifiers = []
+        self.largest_x = 0
+        self.largest_y = 0
         
         self.root = Tk()
         
@@ -72,13 +75,33 @@ class Diagram():
 
     
     def __plot_the_points(self, x_axis, y_axis, r, outline_color, fill_color):
-        largest_x = max(x_axis)
-        largest_y = max(y_axis)
         
+        if self.largest_x < max(x_axis):
+            previous_largest_x = self.largest_x
+            self.largest_x = max(x_axis)
+            #move the previous points
+            for point in self.points_identifiers:
+                dx = (self.canvas.coords(point)[0] + r - self.horizontal_margins/2)*(1 - previous_largest_x/self.largest_x)
+                self.canvas.move(point, -dx, 0)
+        
+        if self.largest_y < max(y_axis):
+            previous_largest_y = self.largest_y
+            self.largest_y = max(y_axis) 
+            #move the previous points
+            for point in self.points_identifiers:
+                dy = (previous_largest_y/self.largest_y - 1) * (self.height - self.canvas.coords(point)[3] + r - self.vertical_margins/2)
+                self.canvas.move(point, 0, -dy)
+        
+        
+        
+        #self.points_identifiers = [] * len(x_axis)
         for i in range(len(x_axis)):
             #self.draw.ellipse(( point_width(x_axis[i]) - r,point_height(y_axis[i]) - r,point_width(x_axis[i]) + r,point_height(y_axis[i]) + r),fill=(255,0,0))
-            x,y = self.point_relative_dimensions(x_axis[i], y_axis[i], largest_x, largest_y) 
-            self.canvas.create_oval(x - r, y - r, x + r, y + r, outline = outline_color, fill = fill_color) 
+            x,y = self.point_relative_dimensions(x_axis[i], y_axis[i], self.largest_x, self.largest_y) 
+            self.points_identifiers.append(self.canvas.create_oval(x - r, y - r, x + r, y + r, outline = outline_color, fill = fill_color))
+        return self.points_identifiers
+    
+    
     
     def __plot_the_lines(self, x_axis, y_axis, line_colour):
         largest_x = max(x_axis)
@@ -109,7 +132,9 @@ class Diagram():
         
         x_axis, y_axis = din.data_instances_to_lists(data_instances)
         self.__plot_the_points(x_axis, y_axis, r, outline_color, fill_color)
-        self.root.wm_title("scatter plot") 
+        
+        self.root.wm_title("scatter plot")
+        
         #self.root.mainloop()
     
     def __scatter_plot_axis(self, x_axis = [], y_axis =[],  r = 2, outline_color = "red", fill_color = "red"):
